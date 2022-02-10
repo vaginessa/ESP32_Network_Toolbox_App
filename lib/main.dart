@@ -9,7 +9,6 @@ import 'network_map.dart';
 import 'wifi_scanner.dart';
 import 'wifi_deauther.dart';
 import 'blt_scanner.dart';
-import 'terminal.dart';
 import 'constants.dart';
 
 void main() {
