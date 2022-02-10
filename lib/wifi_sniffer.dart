@@ -139,7 +139,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
 
   Function eq = const ListEquality().equals;
   void parsePacket(Uint8List data) {
-    if (data.length > 0) {
+    if (data.length > 12) {
       //if (!eq(data.sublist(0, 4), [212, 195, 178, 161])) {
       //  if (data[9] == 0 &&
       //      data[10] == 0 &&
