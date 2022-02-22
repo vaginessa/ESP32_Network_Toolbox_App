@@ -113,17 +113,14 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   void parsePacket(Uint8List data) {
     if (data.length > 15) {
       Uint8List rawPacket = data.sublist(16);
-      if (rawPacket.length < 37) {
-        return;
-      }
       String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
       int toDS =
           (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
       int fromDS =
           (rawPacket[1] & 0x3) & 0x1; // get the last of the 2 first bits
-      String mac1Mean = "";
-      String mac2Mean = "";
-      String mac3Mean = "";
+      String mac1Mean = "None";
+      String mac2Mean = "None";
+      String mac3Mean = "None";
       if (toDS == 0 && fromDS == 0) {
         mac1Mean = "RA=DA";
         mac2Mean = "TA=SA";
@@ -141,20 +138,22 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         mac2Mean = "TA";
         mac3Mean = "DA";
       }
-      String mac1 = "";
-      String mac2 = "";
-      String mac3 = "";
-      mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
-      if (!outputMacsList.contains(mac1)) {
-        outputMacsList.add(mac1);
-      }
-      mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
-      if (!outputMacsList.contains(mac2)) {
-        outputMacsList.add(mac2);
-      }
-      mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
-      if (!outputMacsList.contains(mac3)) {
-        outputMacsList.add(mac3);
+      String mac1 = "None";
+      String mac2 = "None";
+      String mac3 = "None";
+      if (rawPacket.length > 24) {
+        mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
+        if (!outputMacsList.contains(mac1)) {
+          outputMacsList.add(mac1);
+        }
+        mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
+        if (!outputMacsList.contains(mac2)) {
+          outputMacsList.add(mac2);
+        }
+        mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
+        if (!outputMacsList.contains(mac3)) {
+          outputMacsList.add(mac3);
+        }
       }
       String ssid = "None";
       String channel = "None";
