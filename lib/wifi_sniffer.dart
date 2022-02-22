@@ -120,7 +120,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
             .add({"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"});
       }
     } else if (type == "Mgmt-Probe Response") {
-      if (!networksMap.containsKey(ssid)) {s
+      if (!networksMap.containsKey(ssid)) {
         networksMap[ssid] = {
           "BSSID": srcMac,
           "VENDOR": "",
