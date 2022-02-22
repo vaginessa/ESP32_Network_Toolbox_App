@@ -154,9 +154,6 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         return;
       }
       Uint8List rawPacket = data.sublist(16);
-      if (rawPacket.length < 37) {
-        return;
-      }
       String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
       int toDS =
           (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
@@ -183,20 +180,25 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         mac2Mean = "TA";
         mac3Mean = "DA";
       }
-      String mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
-      if (!macsList.contains(mac1)) {
-        macsList.add(mac1);
-        outputMacsList.add(mac1);
-      }
-      String mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
-      if (!macsList.contains(mac2)) {
-        macsList.add(mac2);
-        outputMacsList.add(mac2);
-      }
-      String mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
-      if (!macsList.contains(mac3)) {
-        macsList.add(mac3);
-        outputMacsList.add(mac3);
+      String mac1 = "";
+      String mac2 = "";
+      String mac3 = "";
+      if (rawPacket.length > 24) {
+        mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
+        if (!macsList.contains(mac1)) {
+          macsList.add(mac1);
+          outputMacsList.add(mac1);
+        }
+        mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
+        if (!macsList.contains(mac2)) {
+          macsList.add(mac2);
+          outputMacsList.add(mac2);
+        }
+        mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
+        if (!macsList.contains(mac3)) {
+          macsList.add(mac3);
+          outputMacsList.add(mac3);
+        }
       }
       String ssid = "None";
       String channel = "None";
