@@ -43,16 +43,14 @@ class _MapPageState extends State<MapPage> {
       });
     }
     for (String key in networksMap.keys) {
-      int i = 0;
       if (networksMap[key]["VENDOR"] == "") {
         networksMap[key]["VENDOR"] =
             await fetchVendor(networksMap[key]["BSSID"]);
       }
-      for (Map sta in networksMap[key]["STAs"]) {
-        if (networksMap[key]["STAs"][i]["VENDOR"] == "") {
-          networksMap[key]["STAs"][i]["VENDOR"] = await fetchVendor(sta["MAC"]);
+      for (String sta in networksMap[key]["STAs"].keys) {
+        if (networksMap[key]["STAs"][sta] == "") {
+          networksMap[key]["STAs"][sta] = await fetchVendor(sta);
         }
-        i++;
       }
     }
     await Future.delayed(const Duration(seconds: 1), () {});
@@ -91,14 +89,15 @@ class _MapPageState extends State<MapPage> {
                               ),
                           shrinkWrap: true,
                           itemBuilder: (context, stasPosition) {
+                            String sta = networksMap[ssids[ssidsPosition]]
+                                    ["STAs"]
+                                .keys
+                                .elementAt(stasPosition);
                             return ListTile(
-                              title: Text(
-                                  networksMap[ssids[ssidsPosition]]["STAs"]
-                                      [stasPosition]["MAC"],
-                                  textAlign: TextAlign.center),
+                              title: Text(sta, textAlign: TextAlign.center),
                               subtitle: Text(
                                   networksMap[ssids[ssidsPosition]]["STAs"]
-                                      [stasPosition]["VENDOR"],
+                                      [sta],
                                   textAlign: TextAlign.center),
                             );
                           },

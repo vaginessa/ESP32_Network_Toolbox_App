@@ -110,14 +110,10 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
           "BSSID": srcMac,
           "VENDOR": "",
           "CHANNEL": chan,
-          "STAs": [
-            {"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"}
-          ]
+          "STAs": {"ff:ff:ff:ff:ff:ff": "None"}
         };
-      } else if (!networksMap[ssid]["STAs"]
-          .contains({"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"})) {
-        networksMap[ssid]["STAs"]
-            .add({"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"});
+      } else if (!networksMap[ssid]["STAs"].containsKey("ff:ff:ff:ff:ff:ff")) {
+        networksMap[ssid]["STAs"]["ff:ff:ff:ff:ff:ff"] = "None";
       }
     } else if (type == "Mgmt-Probe Response") {
       if (!networksMap.containsKey(ssid)) {
@@ -125,13 +121,10 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
           "BSSID": srcMac,
           "VENDOR": "",
           "CHANNEL": chan,
-          "STAs": [
-            {"MAC": dstMac, "VENDOR": ""}
-          ]
+          "STAs": {dstMac: ""}
         };
-      } else if (!networksMap[ssid]["STAs"]
-          .contains({"MAC": dstMac, "VENDOR": ""})) {
-        networksMap[ssid]["STAs"].add({"MAC": dstMac, "VENDOR": ""});
+      } else if (!networksMap[ssid]["STAs"].containsKey(dstMac)) {
+        networksMap[ssid]["STAs"][dstMac] = "";
       }
     } else if (type == "Data-QoS Data" ||
         type == "Data-QoS Null(no data)" ||
@@ -139,14 +132,14 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
       for (String key in networksMap.keys) {
         if (networksMap[key]["BSSID"] == dstMac) {
           bool check = false;
-          for (Map<String, dynamic> sta in networksMap[key]["STAs"]) {
-            if (sta["MAC"] == srcMac) {
+          for (String sta in networksMap[key]["STAs"].keys) {
+            if (sta == srcMac) {
               check = true;
               break;
             }
           }
           if (check == false) {
-            networksMap[key]["STAs"].add({"MAC": srcMac, "VENDOR": ""});
+            networksMap[key]["STAs"][srcMac] = "";
             break;
           }
         }
