@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:ninja_hex/ninja_hex.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'package:usb_serial/transaction.dart';
-import 'package:collection/collection.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 
 import 'constants.dart';
@@ -111,86 +110,86 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
     return -1;
   }
 
-  Function eq = const ListEquality().equals;
   void parsePacket(Uint8List data) {
     if (data.length > 15) {
-      if (!eq(data.sublist(0, 4), [212, 195, 178, 161])) {
-        Uint8List rawPacket = data.sublist(16);
-        if (rawPacket.length == 0) {
-          return;
-        }
-        String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
-        int toDS =
-            (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
-        int fromDS =
-            (rawPacket[1] & 0x3) & 0x1; // get the last of the 2 first bits
-        String mac1Mean = "";
-        String mac2Mean = "";
-        String mac3Mean = "";
-        if (toDS == 0 && fromDS == 0) {
-          mac1Mean = "RA=DA";
-          mac2Mean = "TA=SA";
-          mac3Mean = "BSSID";
-        } else if (toDS == 0 && fromDS == 1) {
-          mac1Mean = "RA=DA";
-          mac2Mean = "TA=BSSID";
-          mac3Mean = "SA";
-        } else if (toDS == 1 && fromDS == 0) {
-          mac1Mean = "RA=SSID";
-          mac2Mean = "TA=SA";
-          mac3Mean = "DA";
-        } else if (toDS == 1 && fromDS == 1) {
-          mac1Mean = "RA";
-          mac2Mean = "TA";
-          mac3Mean = "DA";
-        }
-        String mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
-        if (!outputMacsList.contains(mac1)) {
-          outputMacsList.add(mac1);
-        }
-        String mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
-        if (!outputMacsList.contains(mac2)) {
-          outputMacsList.add(mac2);
-        }
-        String mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
-        if (!outputMacsList.contains(mac3)) {
-          outputMacsList.add(mac3);
-        }
-        String ssid = "None";
-        String channel = "None";
-        if ((typeStr == "Mgmt-Beacon") &&
-            rawPacket.length > 37 &&
-            rawPacket[36] == 0 &&
-            rawPacket.length >= 38 + rawPacket[37]) {
-          Uint8List uSsid = rawPacket.sublist(38, 38 + rawPacket[37]);
-          if (uSsid != null) {
-            ssid = String.fromCharCodes(uSsid);
-          }
-          if (rawPacket.length >= 66 && rawPacket[65] != null) {
-            channel = rawPacket[65].toString();
-          }
-        } else if (typeStr == "Data-QoS Data") {
-          int i = indexOfStr(rawPacket, "POST");
-          if (i != -1) {
-            typeStr = "EvilPass";
-          }
-        }
-        if (!outputTypesList.contains(typeStr)) {
-          outputTypesList.add(typeStr);
-        }
-        Map<String, String> pkt = {};
-        pkt["SSID"] = "SSID: $ssid";
-        pkt["TYPE"] = "TYPE: $typeStr";
-        pkt["MAC1"] = "$mac1Mean: $mac1";
-        pkt["MAC2"] = "$mac2Mean: $mac2";
-        pkt["MAC3"] = "$mac3Mean: $mac3";
-        pkt["CHANNEL"] = "CHAN: $channel";
-        pkt["PKT"] = hexView(0, data, printAscii: true);
-        // 0 crashes... Issue opened : https://github.com/ninja-dart/hex/issues/1
-        // used modified version from https://github.com/EParisot/hex
-
-        packetsList.add(pkt);
+      Uint8List rawPacket = data.sublist(16);
+      if (rawPacket.length < 37) {
+        return;
       }
+      String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
+      int toDS =
+          (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
+      int fromDS =
+          (rawPacket[1] & 0x3) & 0x1; // get the last of the 2 first bits
+      String mac1Mean = "";
+      String mac2Mean = "";
+      String mac3Mean = "";
+      if (toDS == 0 && fromDS == 0) {
+        mac1Mean = "RA=DA";
+        mac2Mean = "TA=SA";
+        mac3Mean = "BSSID";
+      } else if (toDS == 0 && fromDS == 1) {
+        mac1Mean = "RA=DA";
+        mac2Mean = "TA=BSSID";
+        mac3Mean = "SA";
+      } else if (toDS == 1 && fromDS == 0) {
+        mac1Mean = "RA=SSID";
+        mac2Mean = "TA=SA";
+        mac3Mean = "DA";
+      } else if (toDS == 1 && fromDS == 1) {
+        mac1Mean = "RA";
+        mac2Mean = "TA";
+        mac3Mean = "DA";
+      }
+      String mac1 = "";
+      String mac2 = "";
+      String mac3 = "";
+      mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
+      if (!outputMacsList.contains(mac1)) {
+        outputMacsList.add(mac1);
+      }
+      mac2 = uint8listToMacString(rawPacket.sublist(10, 16));
+      if (!outputMacsList.contains(mac2)) {
+        outputMacsList.add(mac2);
+      }
+      mac3 = uint8listToMacString(rawPacket.sublist(16, 24));
+      if (!outputMacsList.contains(mac3)) {
+        outputMacsList.add(mac3);
+      }
+      String ssid = "None";
+      String channel = "None";
+      if (((typeStr == "Mgmt-Beacon") || (typeStr == "Mgmt-Probe Response")) &&
+          rawPacket.length > 37 &&
+          rawPacket[36] == 0 &&
+          rawPacket.length >= 38 + rawPacket[37]) {
+        Uint8List uSsid = rawPacket.sublist(38, 38 + rawPacket[37]);
+        if (uSsid != null) {
+          ssid = String.fromCharCodes(uSsid);
+        }
+        if (rawPacket.length >= 66 && rawPacket[65] != null) {
+          channel = rawPacket[65].toString();
+        }
+      } else if (typeStr == "Data-QoS Data") {
+        int i = indexOfStr(rawPacket, "POST");
+        if (i != -1) {
+          typeStr = "EvilPass";
+        }
+      }
+      if (!outputTypesList.contains(typeStr)) {
+        outputTypesList.add(typeStr);
+      }
+      Map<String, String> pkt = {};
+      pkt["SSID"] = "SSID: $ssid";
+      pkt["TYPE"] = "TYPE: $typeStr";
+      pkt["MAC1"] = "$mac1Mean: $mac1";
+      pkt["MAC2"] = "$mac2Mean: $mac2";
+      pkt["MAC3"] = "$mac3Mean: $mac3";
+      pkt["CHANNEL"] = "CHAN: $channel";
+      pkt["PKT"] = hexView(0, data, printAscii: true);
+      // 0 crashes... Issue opened : https://github.com/ninja-dart/hex/issues/1
+      // used modified version from https://github.com/EParisot/hex
+
+      packetsList.add(pkt);
     }
   }
 
