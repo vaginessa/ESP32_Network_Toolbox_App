@@ -397,11 +397,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                     outputMacsList = [""];
                                     for (String key in networksMap.keys) {
                                       if (key == ssidFieldValue) {
-                                        for (var sta in networksMap[key]
-                                            ["STAs"]) {
-                                          if (!outputMacsList
-                                              .contains(sta["MAC"])) {
-                                            outputMacsList.add(sta["MAC"]);
+                                        for (String sta
+                                            in networksMap[key]["STAs"].keys) {
+                                          if (!outputMacsList.contains(sta)) {
+                                            outputMacsList.add(sta);
                                           }
                                         }
                                       }
@@ -443,9 +442,9 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                       outputSsidsList = ssidsList;
                                     } else {
                                       for (String key in networksMap.keys) {
-                                        for (var sta in networksMap[key]
-                                            ["STAs"]) {
-                                          if (sta["MAC"].toLowerCase() ==
+                                        for (String sta
+                                            in networksMap[key]["STAs"].keys) {
+                                          if (sta.toLowerCase() ==
                                                   macFieldValue.toLowerCase() &&
                                               !outputSsidsList.contains(key)) {
                                             outputSsidsList.add(key);
