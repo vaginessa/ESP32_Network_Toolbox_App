@@ -28,7 +28,7 @@ List<String> typesList = [""];
 String channel;
 String country;
 
-Map<String, Map<String, dynamic>> networksMap = {};
+Map<String, dynamic> networksMap = {};
 
 List<String> countriesList =
     CountryCode.values.map<String>((c) => c.alpha2).toList();
