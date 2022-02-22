@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:ninja_hex/ninja_hex.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'package:usb_serial/transaction.dart';
-import 'package:collection/collection.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 
 import 'constants.dart';
@@ -115,6 +114,24 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
             {"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"}
           ]
         };
+      } else if (!networksMap[ssid]["STAs"]
+          .contains({"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"})) {
+        networksMap[ssid]["STAs"]
+            .add({"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"});
+      }
+    } else if (type == "Mgmt-Probe Response") {
+      if (!networksMap.containsKey(ssid)) {s
+        networksMap[ssid] = {
+          "BSSID": srcMac,
+          "VENDOR": "",
+          "CHANNEL": chan,
+          "STAs": [
+            {"MAC": dstMac, "VENDOR": ""}
+          ]
+        };
+      } else if (!networksMap[ssid]["STAs"]
+          .contains({"MAC": dstMac, "VENDOR": ""})) {
+        networksMap[ssid]["STAs"].add({"MAC": dstMac, "VENDOR": ""});
       }
     } else if (type == "Data-QoS Data" ||
         type == "Data-QoS Null(no data)" ||
@@ -137,21 +154,13 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
     }
   }
 
-  Function eq = const ListEquality().equals;
   void parsePacket(Uint8List data) {
     if (data.length > 12) {
-      //if (!eq(data.sublist(0, 4), [212, 195, 178, 161])) {
-      //  if (data[9] == 0 &&
-      //      data[10] == 0 &&
-      //      data[11] == 0 &&
-      //      data[13] == 0 &&
-      //      data[14] == 0 &&
-      //      data[15] == 0) {
       int pktLen = data[12];
       if (data.length < 16 + pktLen) {
         return;
       }
-      Uint8List rawPacket = data.sublist(16, data.length - 1);
+      Uint8List rawPacket = data.sublist(16);
       if (rawPacket.length < 37) {
         return;
       }
@@ -198,7 +207,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
       }
       String ssid = "None";
       String channel = "None";
-      if (typeStr == "Mgmt-Beacon" &&
+      if (((typeStr == "Mgmt-Beacon") || (typeStr == "Mgmt-Probe Response")) &&
           pktLen > 37 &&
           rawPacket[36] == 0 &&
           pktLen >= 38 + rawPacket[37]) {
@@ -230,15 +239,12 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
       // used modified version from https://github.com/EParisot/hex
       mapNetworks(pkt);
       packetsList.add(pkt);
-      //}
-      //}
     }
   }
 
   void execFilters() {
     if (sniffing == false && packetsList.length == 0) {
       for (Uint8List pkt in rawPacketsList) {
-        print("packet");
         parsePacket(pkt);
       }
     }
@@ -292,7 +298,6 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
           Uint8List.fromList(("stop").codeUnits + [13, 10]),
           Duration(seconds: 1));
       transaction.dispose();
-      print("sniffer stopped");
       if (mounted) {
         setState(() {
           iconData = Icons.wifi_tethering;
@@ -456,8 +461,10 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                         .toList();
                                     outputTypesList = typesList
                                         .where((string) => outputList.any(
-                                            (element) => element["TYPE"]
-                                                .contains(string)))
+                                            (element) =>
+                                                string != null &&
+                                                element["TYPE"]
+                                                    .contains(string)))
                                         .toList();
                                   } else {
                                     outputMacsList = macsList;
@@ -516,8 +523,9 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                         )),
                     items: outputTypesList.map((String value) {
                       return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(value),
+                        value: (value != null) ? value : "",
+                        child: new Text((value != null) ? value : "",
+                            overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
                     onChanged: (sniffing)
