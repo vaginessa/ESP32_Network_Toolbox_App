@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
+import 'package:csv/csv.dart';
 
+import 'utils.dart';
 import 'constants.dart';
 
 class WifiScannerPage extends StatefulWidget {
@@ -19,6 +21,9 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
   final passwordController = TextEditingController();
   bool scanning = false;
   var subscription;
+  List<List> networks = [
+    ["ssid", "bssid", "channel"]
+  ];
 
   @override
   void initState() {
@@ -140,6 +145,9 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
         waitVisible = true;
         scanning = true;
         networksList.clear();
+        networks = [
+          ["ssid", "bssid", "channel"]
+        ];
       });
     }
 
@@ -156,6 +164,8 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
               network["CONNECTED"] = false;
             }
             networksList.add(network);
+            networks
+                .add([network["SSID"], network["BSSID"], network["CHANNEL"]]);
             if (!ssidsList.contains(network["SSID"])) {
               ssidsList.add(network["SSID"]);
             }
@@ -184,6 +194,9 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
         scanning = false;
       });
     }
+    String csv = const ListToCsvConverter().convert(networks);
+    final file = await localFile("Wifi_Scanner", "csv");
+    await file.writeAsString(csv);
   }
 
   void _openPopup(String ssid, BuildContext context) {
