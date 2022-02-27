@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 import 'package:http/http.dart';
 
+import 'utils.dart';
 import 'constants.dart';
 
 class MapPage extends StatefulWidget {
@@ -59,6 +61,9 @@ class _MapPageState extends State<MapPage> {
         fetchingVendors = false;
       });
     }
+    String json = jsonEncode(networksMap);
+    final file = await localFile("Network_Map", "json");
+    await file.writeAsString(json);
   }
 
   Widget ssidsBuilder() {

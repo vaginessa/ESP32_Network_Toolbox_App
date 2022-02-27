@@ -229,7 +229,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         outputList.clear();
         outputTypesList = [""];
       });
-      file = await localFile("Deauther");
+      file = await localFile("Deauther", 'pcap');
       if (file != null) {
         if (currSSID.length == 0) {
           // Configure ESP deauther

@@ -1,8 +1,10 @@
+import 'package:esp32_network/utils.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
+import 'package:csv/csv.dart';
 
 import 'constants.dart';
 
@@ -18,11 +20,15 @@ class _BltScannerPageState extends State<BltScannerPage> {
   final passwordController = TextEditingController();
   bool scanning = false;
   var subscription;
+  List<List> bltList;
 
   @override
   void initState() {
     super.initState();
     bltDevicesList = [];
+    bltList = [
+      ["name", "mac"]
+    ];
     usbListener();
     scanDevices();
   }
@@ -105,6 +111,9 @@ class _BltScannerPageState extends State<BltScannerPage> {
         waitVisible = true;
         scanning = true;
         bltDevicesList.clear();
+        bltList = [
+          ["name", "mac"]
+        ];
       });
     }
 
@@ -119,6 +128,7 @@ class _BltScannerPageState extends State<BltScannerPage> {
                 (deviceFromList) => device["MAC"] == deviceFromList["MAC"])) {
           setState(() {
             bltDevicesList.add(device);
+            bltList.add([device["NAME"], device["MAC"]]);
           });
         }
         data = null;
@@ -134,6 +144,9 @@ class _BltScannerPageState extends State<BltScannerPage> {
         scanning = false;
       });
     }
+    String csv = const ListToCsvConverter().convert(bltList);
+    final file = await localFile("BLT_Scanner", 'csv');
+    await file.writeAsString(csv);
   }
 
   @override

@@ -318,7 +318,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         outputTypesList = [""];
         typeFieldValue = null;
       });
-      file = await localFile("Sniffer");
+      file = await localFile("Sniffer", "pcap");
       if (file != null) {
         if (currSSID.length == 0) {
           // Configure ESP sniffer

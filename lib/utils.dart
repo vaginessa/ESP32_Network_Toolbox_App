@@ -10,13 +10,13 @@ import 'package:date_format/date_format.dart';
 
 import 'constants.dart';
 
-Future<File> localFile(String name) async {
+Future<File> localFile(String name, String ext) async {
   await createDir();
   if (fileDir.existsSync()) {
     var now = new DateTime.now();
     String formattedDate =
         formatDate(now, [yyyy, '_', MM, '_', dd, '_', HH, '_', nn, '_', ss]);
-    String filePath = '${fileDir.path}/${name}_$formattedDate.pcap';
+    String filePath = '${fileDir.path}/${name}_$formattedDate.$ext';
     file = File(filePath);
     if (!file.existsSync()) {
       file.create();
