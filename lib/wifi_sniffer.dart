@@ -12,34 +12,34 @@ import 'constants.dart';
 import 'utils.dart';
 
 class WifiSnifferPage extends StatefulWidget {
-  WifiSnifferPage({Key key}) : super(key: key);
+  WifiSnifferPage({Key? key}) : super(key: key);
 
   @override
   _WifiSnifferPageState createState() => _WifiSnifferPageState();
 }
 
 class _WifiSnifferPageState extends State<WifiSnifferPage> {
-  bool sniffing;
+  bool? sniffing;
   IconData iconData = Icons.wifi_tethering;
   ScrollController _scrollController = new ScrollController();
 
   List<Uint8List> rawPacketsList = [];
 
   Map<String, String> filtersList = {
-    "SSID": null,
-    "MAC": null,
-    "TYPE": null,
-    "CHANNEL": null
+    "SSID": "",
+    "MAC": "",
+    "TYPE": "",
+    "CHANNEL": ""
   };
 
   List<String> outputMacsList = macsList;
   List<String> outputSsidsList = ssidsList;
   List<String> outputTypesList = typesList;
 
-  String macFieldValue;
-  String ssidFieldValue;
-  String typeFieldValue;
-  String channelFieldValue;
+  String? macFieldValue;
+  String? ssidFieldValue;
+  String? typeFieldValue;
+  String? channelFieldValue;
 
   @override
   void initState() {
@@ -50,10 +50,10 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         if (mounted) {
           setState(() {
@@ -77,7 +77,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
     usbPort = await selectedDevice.create();
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -89,21 +89,21 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
       });
     }
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
   }
 
   void mapNetworks(Map<String, String> pkt) {
-    String type = pkt["TYPE"].split(": ")[1];
-    String ssid = pkt["SSID"].split(": ")[1];
-    String dstMac = pkt["MAC1"].split(": ")[1];
-    String srcMac = pkt["MAC2"].split(": ")[1];
-    String chan = pkt["CHANNEL"].split(": ")[1];
+    String type = pkt["TYPE"]!.split(": ")[1];
+    String ssid = pkt["SSID"]!.split(": ")[1];
+    String dstMac = pkt["MAC1"]!.split(": ")[1];
+    String srcMac = pkt["MAC2"]!.split(": ")[1];
+    String chan = pkt["CHANNEL"]!.split(": ")[1];
     if (type == "Mgmt-Beacon") {
       if (!networksMap.containsKey(ssid)) {
         networksMap[ssid] = {
@@ -154,7 +154,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         return;
       }
       Uint8List rawPacket = data.sublist(16);
-      String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
+      String typeStr = pktsTypes[rawPacket[0] & 0xfc]!; // clear 2 first bits
       int toDS =
           (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
       int fromDS =
@@ -207,10 +207,8 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
           rawPacket[36] == 0 &&
           pktLen >= 38 + rawPacket[37]) {
         Uint8List uSsid = rawPacket.sublist(38, 38 + rawPacket[37]);
-        if (uSsid != null) {
-          ssid = String.fromCharCodes(uSsid);
-        }
-        if (rawPacket.length >= 66 && rawPacket[65] != null) {
+        ssid = String.fromCharCodes(uSsid);
+        if (rawPacket.length >= 66) {
           channel = rawPacket[65].toString();
         }
       }
@@ -256,24 +254,25 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                 .where((pkt) =>
                     (key == "SSID" &&
                             ssidToRssid.keys.contains(filtersList[key]) &&
-                            pkt["MAC1"].toLowerCase().contains(
-                                ssidToRssid[filtersList[key]].toLowerCase()) ||
+                            pkt["MAC1"]!.toLowerCase().contains(
+                                ssidToRssid[filtersList[key]]!.toLowerCase()) ||
                         (ssidToRssid.keys.contains(filtersList[key]) &&
-                            pkt["MAC2"].toLowerCase().contains(
-                                ssidToRssid[filtersList[key]].toLowerCase())) ||
+                            pkt["MAC2"]!.toLowerCase().contains(
+                                ssidToRssid[filtersList[key]]!
+                                    .toLowerCase())) ||
                         (ssidToRssid.keys.contains(filtersList[key]) &&
-                            pkt["MAC3"].toLowerCase().contains(
-                                ssidToRssid[filtersList[key]]
+                            pkt["MAC3"]!.toLowerCase().contains(
+                                ssidToRssid[filtersList[key]]!
                                     .toLowerCase()))) ||
-                    pkt[(key == "MAC") ? "MAC1" : key]
+                    pkt[(key == "MAC") ? "MAC1" : key]!
                         .toLowerCase()
-                        .contains(filtersList[key].toLowerCase()) ||
-                    pkt[(key == "MAC") ? "MAC2" : key]
+                        .contains(filtersList[key]!.toLowerCase()) ||
+                    pkt[(key == "MAC") ? "MAC2" : key]!
                         .toLowerCase()
-                        .contains(filtersList[key].toLowerCase()) ||
-                    pkt[(key == "MAC") ? "MAC3" : key]
+                        .contains(filtersList[key]!.toLowerCase()) ||
+                    pkt[(key == "MAC") ? "MAC3" : key]!
                         .toLowerCase()
-                        .contains(filtersList[key].toLowerCase()))
+                        .contains(filtersList[key]!.toLowerCase()))
                 .toList();
           }
         }
@@ -281,15 +280,15 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
     }
   }
 
-  Transaction<Uint8List> pcapTransaction;
+  Transaction<Uint8List>? pcapTransaction;
   Future<void> startSniffer() async {
-    if (sniffing) {
+    if (sniffing!) {
       // Stop Sniffer
-      pcapTransaction.dispose();
+      pcapTransaction!.dispose();
       Transaction<String> transaction = Transaction.stringTerminated(
-          usbPort.inputStream, Uint8List.fromList([13, 10]));
+          usbPort!.inputStream!, Uint8List.fromList([13, 10]));
       await transaction.transaction(
-          usbPort,
+          usbPort!,
           Uint8List.fromList(("stop").codeUnits + [13, 10]),
           Duration(seconds: 1));
       transaction.dispose();
@@ -302,8 +301,8 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
       execFilters();
       rawPacketsList.clear();
     } else {
-      usbPort.close();
-      await connectSerial(device);
+      usbPort!.close();
+      await connectSerial(device!);
       // Start Sniffer
       setState(() {
         packetsList.clear();
@@ -323,29 +322,29 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         if (currSSID.length == 0) {
           // Configure ESP sniffer
           Transaction<String> transaction = Transaction.stringTerminated(
-              usbPort.inputStream, Uint8List.fromList([13, 10]));
+              usbPort!.inputStream!, Uint8List.fromList([13, 10]));
           var response = await transaction.transaction(
-              usbPort,
+              usbPort!,
               Uint8List.fromList(
-                  ("set country " + country).codeUnits + [13, 10]),
+                  ("set country " + country!).codeUnits + [13, 10]),
               Duration(seconds: 1));
           print("received = $response");
           response = await transaction.transaction(
-              usbPort,
+              usbPort!,
               Uint8List.fromList(
-                  ("set channel " + channelFieldValue).codeUnits + [13, 10]),
+                  ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
               Duration(seconds: 1));
           print("received = $response");
           transaction.dispose();
         }
         // Listen packets from serial and save
         pcapTransaction = Transaction.terminated(
-            usbPort.inputStream, Uint8List.fromList("<STOP>".codeUnits));
-        pcapTransaction.stream.listen((Uint8List data) {
-          file.writeAsBytesSync(data, mode: FileMode.append, flush: true);
+            usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
+        pcapTransaction!.stream.listen((Uint8List data) {
+          file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
           rawPacketsList.add(data);
         });
-        await usbPort
+        await usbPort!
             .write(Uint8List.fromList(("wifi_sniff").codeUnits + [13, 10]));
         if (mounted) {
           setState(() {
@@ -382,7 +381,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                   children: [
                     FittedBox(
                       fit: BoxFit.fitWidth,
-                      child: Text(outputList[index]["PKT"],
+                      child: Text(outputList[index]["PKT"]!,
                           style: TextStyle(fontFeatures: [
                             FontFeature.tabularFigures(),
                           ])),
@@ -429,37 +428,35 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                             child: Text(value, overflow: TextOverflow.ellipsis),
                           );
                         }).toList(),
-                        onChanged: (sniffing)
+                        onChanged: (sniffing!)
                             ? null
                             : (dynamic newValue) {
                                 setState(() {
                                   ssidFieldValue =
                                       (newValue.length > 0) ? newValue : null;
-                                  filtersList["SSID"] = ssidFieldValue;
+                                  filtersList["SSID"] = ssidFieldValue!;
                                   execFilters();
                                   if (ssidFieldValue != null) {
                                     outputMacsList = macsList
                                         .where((string) => outputList.any(
                                             (element) =>
-                                                element["MAC1"]
+                                                element["MAC1"]!
                                                     .toLowerCase()
                                                     .contains(
                                                         string.toLowerCase()) ||
-                                                element["MAC2"]
+                                                element["MAC2"]!
                                                     .toLowerCase()
                                                     .contains(
                                                         string.toLowerCase()) ||
-                                                element["MAC3"]
+                                                element["MAC3"]!
                                                     .toLowerCase()
                                                     .contains(
                                                         string.toLowerCase())))
                                         .toList();
                                     outputTypesList = typesList
                                         .where((string) => outputList.any(
-                                            (element) =>
-                                                string != null &&
-                                                element["TYPE"]
-                                                    .contains(string)))
+                                            (element) => element["TYPE"]!
+                                                .contains(string)))
                                         .toList();
                                   } else {
                                     outputMacsList = macsList;
@@ -480,24 +477,24 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                             child: new Text(value),
                           );
                         }).toList(),
-                        onChanged: (sniffing)
+                        onChanged: (sniffing!)
                             ? null
                             : (dynamic newValue) {
                                 setState(() {
                                   ssidFieldValue = null;
                                   macFieldValue =
                                       (newValue.length > 0) ? newValue : null;
-                                  filtersList["MAC"] = macFieldValue;
+                                  filtersList["MAC"] = macFieldValue!;
                                   execFilters();
                                   if (macFieldValue != null) {
                                     outputSsidsList = ssidsList
                                         .where((string) => outputList.any(
-                                            (element) => element["SSID"]
+                                            (element) => element["SSID"]!
                                                 .contains(string)))
                                         .toList();
                                     outputTypesList = typesList
                                         .where((string) => outputList.any(
-                                            (element) => element["TYPE"]
+                                            (element) => element["TYPE"]!
                                                 .contains(string)))
                                         .toList();
                                   } else {
@@ -518,38 +515,37 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                         )),
                     items: outputTypesList.map((String value) {
                       return new DropdownMenuItem<String>(
-                        value: (value != null) ? value : "",
-                        child: new Text((value != null) ? value : "",
-                            overflow: TextOverflow.ellipsis),
+                        value: value,
+                        child: new Text(value, overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
-                    onChanged: (sniffing)
+                    onChanged: (sniffing!)
                         ? null
                         : (dynamic newValue) {
                             setState(() {
                               ssidFieldValue = null;
                               typeFieldValue =
                                   (newValue.length > 0) ? newValue : null;
-                              filtersList["TYPE"] = typeFieldValue;
+                              filtersList["TYPE"] = typeFieldValue!;
                               execFilters();
                               if (macFieldValue != null) {
                                 outputSsidsList = ssidsList
                                     .where((string) => outputList.any(
                                         (element) =>
-                                            element["SSID"].contains(string)))
+                                            element["SSID"]!.contains(string)))
                                     .toList();
                                 outputMacsList = macsList
                                     .where((string) => outputList.any(
                                         (element) =>
-                                            element["MAC1"]
+                                            element["MAC1"]!
                                                 .toLowerCase()
                                                 .contains(
                                                     string.toLowerCase()) ||
-                                            element["MAC2"]
+                                            element["MAC2"]!
                                                 .toLowerCase()
                                                 .contains(
                                                     string.toLowerCase()) ||
-                                            element["MAC3"]
+                                            element["MAC3"]!
                                                 .toLowerCase()
                                                 .contains(
                                                     string.toLowerCase())))
@@ -568,9 +564,9 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                 fontSize: 25, color: Colors.grey[700])))),
                 DropdownButton<String>(
                   value: channelFieldValue,
-                  onChanged: (sniffing)
+                  onChanged: (sniffing!)
                       ? null
-                      : (String newValue) {
+                      : (String? newValue) {
                           setState(() {
                             channelFieldValue = newValue;
                           });
@@ -585,7 +581,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                 ),
               ],
             ),
-            (sniffing)
+            (sniffing!)
                 ? CircularProgressIndicator()
                 : Expanded(
                     child:

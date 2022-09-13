@@ -7,14 +7,14 @@ import 'utils.dart';
 import 'constants.dart';
 
 class MapPage extends StatefulWidget {
-  MapPage({Key key}) : super(key: key);
+  MapPage({Key? key}) : super(key: key);
 
   @override
   _MapPageState createState() => _MapPageState();
 }
 
 class _MapPageState extends State<MapPage> {
-  bool fetchingVendors;
+  bool? fetchingVendors;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MapPageState extends State<MapPage> {
       networksMap.keys.where((key) => key != "" && key != "None").toList();
 
   Future<String> fetchVendor(String mac) async {
-    var response = await get('https://api.macvendors.com/$mac');
+    var response = await get(Uri.parse('https://api.macvendors.com/$mac'));
     if (response.statusCode == 200) {
       return response.body;
     }
@@ -63,16 +63,16 @@ class _MapPageState extends State<MapPage> {
     }
     String json = jsonEncode(networksMap);
     final file = await localFile("Network_Map", "json");
-    await file.writeAsString(json);
+    await file!.writeAsString(json);
   }
 
   Widget ssidsBuilder() {
-    return (fetchingVendors)
+    return (fetchingVendors!)
         ? Visibility(
             maintainSize: false,
             maintainAnimation: true,
             maintainState: true,
-            visible: fetchingVendors,
+            visible: fetchingVendors!,
             child: Container(
                 margin: EdgeInsets.only(top: 50, bottom: 30),
                 child: CircularProgressIndicator()))

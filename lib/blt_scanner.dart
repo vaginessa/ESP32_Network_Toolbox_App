@@ -9,7 +9,7 @@ import 'package:csv/csv.dart';
 import 'constants.dart';
 
 class BltScannerPage extends StatefulWidget {
-  BltScannerPage({Key key}) : super(key: key);
+  BltScannerPage({Key? key}) : super(key: key);
 
   @override
   _BltScannerPageState createState() => _BltScannerPageState();
@@ -20,7 +20,7 @@ class _BltScannerPageState extends State<BltScannerPage> {
   final passwordController = TextEditingController();
   bool scanning = false;
   var subscription;
-  List<List> bltList;
+  List<List>? bltList;
 
   @override
   void initState() {
@@ -41,10 +41,10 @@ class _BltScannerPageState extends State<BltScannerPage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         if (mounted) {
           setState(() {
@@ -68,7 +68,7 @@ class _BltScannerPageState extends State<BltScannerPage> {
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
     usbPort = await selectedDevice.create();
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -80,10 +80,10 @@ class _BltScannerPageState extends State<BltScannerPage> {
       });
     }
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
@@ -118,7 +118,7 @@ class _BltScannerPageState extends State<BltScannerPage> {
     }
 
     Transaction<String> transaction = Transaction.stringTerminated(
-        usbPort.inputStream, Uint8List.fromList([13, 10]));
+        usbPort!.inputStream!, Uint8List.fromList([13, 10]));
     subscription = transaction.stream.listen((String data) {
       if (data.isNotEmpty) {
         Map<String, dynamic> device = jsonDecode(data);
@@ -128,14 +128,14 @@ class _BltScannerPageState extends State<BltScannerPage> {
                 (deviceFromList) => device["MAC"] == deviceFromList["MAC"])) {
           setState(() {
             bltDevicesList.add(device);
-            bltList.add([device["NAME"], device["MAC"]]);
+            bltList!.add([device["NAME"], device["MAC"]]);
           });
         }
-        data = null;
+        data = "";
       }
     });
 
-    usbPort.write(Uint8List.fromList("blt_scan".codeUnits + [13, 10]));
+    usbPort!.write(Uint8List.fromList("blt_scan".codeUnits + [13, 10]));
     await Future.delayed(const Duration(seconds: 10), () {});
     subscription.cancel();
     if (mounted) {
@@ -146,7 +146,7 @@ class _BltScannerPageState extends State<BltScannerPage> {
     }
     String csv = const ListToCsvConverter().convert(bltList);
     final file = await localFile("BLT_Scanner", 'csv');
-    await file.writeAsString(csv);
+    await file!.writeAsString(csv);
   }
 
   @override

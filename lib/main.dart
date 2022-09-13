@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,22 +21,18 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'ESP32 Network ToolBox',
       theme: ThemeData(
-        primarySwatch: Colors.grey,
-        accentColor: Colors.lightGreen,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: 'RobotoMono',
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
+            .copyWith(secondary: Colors.lightGreen),
       ),
       darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.grey,
         hintColor: Colors.grey[700],
-        accentColor: Colors.lightGreen,
-        accentColorBrightness: Brightness.dark,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: 'RobotoMono',
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
+            .copyWith(
+                secondary: Colors.lightGreen, brightness: Brightness.dark),
       ),
       home: HomePage(title: appName),
     );
@@ -45,7 +40,7 @@ class App extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title}) : super(key: key);
+  HomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -74,10 +69,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         setState(() {
           device = null;
@@ -95,9 +90,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
-    usbPort = await selectedDevice.create();
+    usbPort = (await selectedDevice.create())!;
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -107,10 +102,10 @@ class _HomePageState extends State<HomePage> {
       deviceConnected = true;
     });
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
@@ -121,9 +116,9 @@ class _HomePageState extends State<HomePage> {
     await prefs.setString('wifi_country', newValue);
   }
 
-  void handleCountryChange(String newValue) {
+  void handleCountryChange(String? newValue) {
     setState(() {
-      country = newValue;
+      country = newValue!;
       setCountryPref(newValue);
     });
   }
@@ -140,9 +135,9 @@ class _HomePageState extends State<HomePage> {
     await prefs.setString('wifi_channel', newValue);
   }
 
-  void handleChannelChange(String newValue) {
+  void handleChannelChange(String? newValue) {
     setState(() {
-      channel = newValue;
+      channel = newValue!;
       setChanPref(newValue);
     });
   }
@@ -169,10 +164,10 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                     child: ListTile(
                         title: Text("${devicesList[index].productName}"),
-                        subtitle: Text(devicesList[index].manufacturerName),
+                        subtitle: Text(devicesList[index].manufacturerName!),
                         trailing: Icon(
                             (deviceConnected &&
-                                    device.deviceId ==
+                                    device!.deviceId ==
                                         devicesList[index].deviceId)
                                 ? Icons.link_off
                                 : Icons.link,
@@ -347,7 +342,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(top: 20.0),
               child: DropdownButton<String>(
                 value: country,
-                onChanged: (String newValue) {
+                onChanged: (String? newValue) {
                   handleCountryChange(newValue);
                 },
                 items:
@@ -378,7 +373,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(top: 20.0),
               child: DropdownButton<String>(
                 value: channel,
-                onChanged: (String newValue) {
+                onChanged: (String? newValue) {
                   handleChannelChange(newValue);
                 },
                 items:

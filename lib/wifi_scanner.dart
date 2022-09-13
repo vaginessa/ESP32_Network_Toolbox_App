@@ -9,7 +9,7 @@ import 'utils.dart';
 import 'constants.dart';
 
 class WifiScannerPage extends StatefulWidget {
-  WifiScannerPage({Key key}) : super(key: key);
+  WifiScannerPage({Key? key}) : super(key: key);
 
   @override
   _WifiScannerPageState createState() => _WifiScannerPageState();
@@ -40,10 +40,10 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         if (mounted) {
           setState(() {
@@ -67,7 +67,7 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
     usbPort = await selectedDevice.create();
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -79,10 +79,10 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
       });
     }
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
@@ -106,7 +106,7 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
 
   Future<void> connectNetwork(context, String ssid, String pass) async {
     Transaction<String> transaction = Transaction.stringTerminated(
-        usbPort.inputStream, Uint8List.fromList([13, 10]));
+        usbPort!.inputStream!, Uint8List.fromList([13, 10]));
     subscription = transaction.stream.listen((String data) {
       if (data.isNotEmpty) {
         Map<String, dynamic> ip = jsonDecode(data);
@@ -129,7 +129,7 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
     });
     currSSID = "";
     String creds = "wifi_connect " + ssid + " " + pass;
-    usbPort.write(Uint8List.fromList(creds.codeUnits + [13, 10]));
+    usbPort!.write(Uint8List.fromList(creds.codeUnits + [13, 10]));
     await Future.delayed(const Duration(seconds: scanDelay), () {});
     subscription.cancel();
     if (mounted) {
@@ -152,7 +152,7 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
     }
 
     Transaction<String> transaction = Transaction.stringTerminated(
-        usbPort.inputStream, Uint8List.fromList([13, 10]));
+        usbPort!.inputStream!, Uint8List.fromList([13, 10]));
     subscription = transaction.stream.listen((String data) {
       if (data.isNotEmpty) {
         Map<String, dynamic> network = jsonDecode(data);
@@ -181,11 +181,11 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
             }
           });
         }
-        data = null;
+        data = "";
       }
     });
 
-    usbPort.write(Uint8List.fromList("wifi_scan".codeUnits + [13, 10]));
+    usbPort!.write(Uint8List.fromList("wifi_scan".codeUnits + [13, 10]));
     await Future.delayed(const Duration(seconds: 10), () {});
     subscription.cancel();
     if (mounted) {
@@ -196,7 +196,7 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
     }
     String csv = const ListToCsvConverter().convert(networks);
     final file = await localFile("Wifi_Scanner", "csv");
-    await file.writeAsString(csv);
+    await file!.writeAsString(csv);
   }
 
   void _openPopup(String ssid, BuildContext context) {

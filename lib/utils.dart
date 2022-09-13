@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:ext_storage/ext_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,16 +10,16 @@ import 'package:date_format/date_format.dart';
 
 import 'constants.dart';
 
-Future<File> localFile(String name, String ext) async {
+Future<File?> localFile(String name, String ext) async {
   await createDir();
-  if (fileDir.existsSync()) {
+  if (fileDir!.existsSync()) {
     var now = new DateTime.now();
     String formattedDate =
         formatDate(now, [yyyy, '_', MM, '_', dd, '_', HH, '_', nn, '_', ss]);
-    String filePath = '${fileDir.path}/${name}_$formattedDate.$ext';
+    String filePath = '${fileDir!.path}/${name}_$formattedDate.$ext';
     file = File(filePath);
-    if (!file.existsSync()) {
-      file.create();
+    if (!file!.existsSync()) {
+      file!.create();
     }
     return file;
   } else {
@@ -28,7 +28,7 @@ Future<File> localFile(String name, String ext) async {
 }
 
 _makeToast(msg) {
-  FlutterToast.showToast(
+  Fluttertoast.showToast(
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
@@ -40,14 +40,13 @@ _makeToast(msg) {
 
 createDir() async {
   if (await Permission.storage.request().isGranted) {
-    String baseDir = await ExtStorage
-        .getExternalStorageDirectory(); //works for both iOS and Android
+    Directory? baseDir = await getExternalStorageDirectory();
     String dirToBeCreated = "ESP32_Network_Toolbox";
-    String finalDir = Path.join(baseDir, dirToBeCreated);
+    String finalDir = Path.join(baseDir!.path, dirToBeCreated);
     fileDir = Directory(finalDir);
-    bool dirExists = await fileDir.exists();
+    bool dirExists = await fileDir!.exists();
     if (!dirExists) {
-      fileDir.create();
+      fileDir!.create();
     }
   } else {
     _makeToast("Can't access to directory...");

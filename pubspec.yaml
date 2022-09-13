@@ -18,29 +18,29 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  usb_serial: ^0.2.4
-  country_code: ^0.1.1
+  usb_serial: ^0.4.0
+  country_code: ^1.0.0
   shared_preferences: ^2.0.5
   date_format: ^2.0.2
   path: ^1.6.4
-  ext_storage: ^1.0.3
-  fluttertoast: ^5.0.1
-  permission_handler: ^5.0.1+1
+  path_provider: ^2.0.11
+  fluttertoast: ^8.0.8
+  permission_handler: ^10.0.0
   rflutter_alert: ^1.0.3
-  draggable_scrollbar: ^0.0.4
+  draggable_scrollbar: ^0.1.0
   ninja_hex:
     git:
       url: git@github.com:EParisot/hex.git # fork perso
-      ref: master   
-  http: ^0.12.2
+      ref: master
+  http: ^0.13.5
   csv: ^5.0.1
 
-  flutter_launcher_icons: "^0.8.1"
+  flutter_launcher_icons: "^0.10.0"
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

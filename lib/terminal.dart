@@ -6,7 +6,7 @@ import 'package:usb_serial/usb_serial.dart';
 import 'constants.dart';
 
 class TerminalPage extends StatefulWidget {
-  TerminalPage({Key key}) : super(key: key);
+  TerminalPage({Key? key}) : super(key: key);
 
   @override
   _TerminalPageState createState() => _TerminalPageState();
@@ -14,7 +14,7 @@ class TerminalPage extends StatefulWidget {
 
 class _TerminalPageState extends State<TerminalPage> {
   String output = "";
-  TextEditingController _controller;
+  TextEditingController? _controller;
   var subscription;
 
   ScrollController _scrollController = new ScrollController();
@@ -28,7 +28,7 @@ class _TerminalPageState extends State<TerminalPage> {
   void dispose() {
     super.dispose();
     if (_controller != null) {
-      _controller.dispose();
+      _controller!.dispose();
     }
     if (subscription != null) {
       subscription.cancel();
@@ -36,10 +36,10 @@ class _TerminalPageState extends State<TerminalPage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         if (mounted) {
           setState(() {
@@ -63,7 +63,7 @@ class _TerminalPageState extends State<TerminalPage> {
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
     usbPort = await selectedDevice.create();
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -75,10 +75,10 @@ class _TerminalPageState extends State<TerminalPage> {
       });
     }
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
@@ -100,8 +100,8 @@ class _TerminalPageState extends State<TerminalPage> {
                 onSubmitted: (String value) async {
                   if (subscription == null) {
                     Transaction<String> transaction =
-                        Transaction.stringTerminated(
-                            usbPort.inputStream, Uint8List.fromList([13, 10]));
+                        Transaction.stringTerminated(usbPort!.inputStream!,
+                            Uint8List.fromList([13, 10]));
                     subscription = transaction.stream.listen((String data) {
                       setState(() {
                         output += data + "\r\n";
@@ -112,7 +112,8 @@ class _TerminalPageState extends State<TerminalPage> {
                       });
                     });
                   }
-                  usbPort.write(Uint8List.fromList(value.codeUnits + [13, 10]));
+                  usbPort!
+                      .write(Uint8List.fromList(value.codeUnits + [13, 10]));
                 }),
             Expanded(
                 child: SingleChildScrollView(

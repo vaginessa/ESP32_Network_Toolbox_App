@@ -8,12 +8,12 @@ const int BAUD_RATE = 115200;
 
 const int scanDelay = 10;
 
-Directory fileDir;
-File file;
+Directory? fileDir;
+File? file;
 
-UsbPort usbPort;
+UsbPort? usbPort;
 List<UsbDevice> devicesList = [];
-UsbDevice device;
+UsbDevice? device;
 bool deviceConnected = false;
 String currSSID = "";
 List<Map<String, dynamic>> bltDevicesList = [];
@@ -25,8 +25,8 @@ List<String> ssidsList = [""];
 List<String> macsList = [""];
 List<String> typesList = [""];
 
-String channel;
-String country;
+String? channel;
+String? country;
 
 Map<String, dynamic> networksMap = {};
 

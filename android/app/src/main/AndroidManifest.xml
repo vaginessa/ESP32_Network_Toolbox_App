@@ -19,10 +19,11 @@
 		android:resource="@xml/device_filter" />
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="esp32_network"
         android:icon="@mipmap/launcher_icon">
         <activity
+			android:exported="true"
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"

@@ -12,14 +12,14 @@ import 'constants.dart';
 import 'utils.dart';
 
 class WifiDeautherPage extends StatefulWidget {
-  WifiDeautherPage({Key key}) : super(key: key);
+  WifiDeautherPage({Key? key}) : super(key: key);
 
   @override
   _WifiDeautherPageState createState() => _WifiDeautherPageState();
 }
 
 class _WifiDeautherPageState extends State<WifiDeautherPage> {
-  bool deauthing;
+  bool? deauthing;
   IconData iconData = Icons.wifi_tethering;
   ScrollController _scrollController = new ScrollController();
 
@@ -29,10 +29,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   List<String> outputSsidsList = ssidsList;
   List<String> outputTypesList = [""];
 
-  String ssidFieldValue;
-  String macFieldValue;
-  String channelFieldValue;
-  String typeFieldValue;
+  String? ssidFieldValue;
+  String? macFieldValue;
+  String? channelFieldValue;
+  String? typeFieldValue;
   bool eviltwinCheck = false;
 
   @override
@@ -46,10 +46,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   }
 
   void usbListener() {
-    UsbSerial.usbEventStream.listen((UsbEvent msg) async {
+    UsbSerial.usbEventStream!.listen((UsbEvent msg) async {
       await getDevices();
       if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
-        connectSerial(msg.device);
+        connectSerial(msg.device!);
       } else if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
         if (mounted) {
           setState(() {
@@ -73,7 +73,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   Future<bool> connectSerial(UsbDevice selectedDevice) async {
     usbPort = await selectedDevice.create();
 
-    bool openResult = await usbPort.open();
+    bool openResult = await usbPort!.open();
     if (!openResult) {
       return false;
     }
@@ -85,10 +85,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
       });
     }
 
-    await usbPort.setDTR(true);
-    await usbPort.setRTS(true);
+    await usbPort!.setDTR(true);
+    await usbPort!.setRTS(true);
 
-    usbPort.setPortParameters(
+    usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
     return true;
@@ -113,7 +113,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   void parsePacket(Uint8List data) {
     if (data.length > 15) {
       Uint8List rawPacket = data.sublist(16);
-      String typeStr = pktsTypes[rawPacket[0] & 0xfc]; // clear 2 first bits
+      String typeStr = pktsTypes[rawPacket[0] & 0xfc]!; // clear 2 first bits
       int toDS =
           (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
       int fromDS =
@@ -162,10 +162,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           rawPacket[36] == 0 &&
           rawPacket.length >= 38 + rawPacket[37]) {
         Uint8List uSsid = rawPacket.sublist(38, 38 + rawPacket[37]);
-        if (uSsid != null) {
-          ssid = String.fromCharCodes(uSsid);
-        }
-        if (rawPacket.length >= 66 && rawPacket[65] != null) {
+        ssid = String.fromCharCodes(uSsid);
+        if (rawPacket.length >= 66) {
           channel = rawPacket[65].toString();
         }
       } else if (typeStr == "Data-QoS Data") {
@@ -192,15 +190,15 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
     }
   }
 
-  Transaction<Uint8List> pcapTransaction;
+  Transaction<Uint8List>? pcapTransaction;
   Future<void> startDeauther() async {
-    if (deauthing) {
+    if (deauthing!) {
       // Stop Deauther
-      pcapTransaction.dispose();
+      pcapTransaction!.dispose();
       Transaction<String> transaction = Transaction.stringTerminated(
-          usbPort.inputStream, Uint8List.fromList([13, 10]));
+          usbPort!.inputStream!, Uint8List.fromList([13, 10]));
       await transaction.transaction(
-          usbPort,
+          usbPort!,
           Uint8List.fromList(("stop").codeUnits + [13, 10]),
           Duration(seconds: 1));
       transaction.dispose();
@@ -221,8 +219,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
       });
       rawPacketsList.clear();
     } else {
-      usbPort.close();
-      await connectSerial(device);
+      usbPort!.close();
+      await connectSerial(device!);
       // Start Sniffer
       setState(() {
         packetsList.clear();
@@ -234,34 +232,34 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         if (currSSID.length == 0) {
           // Configure ESP deauther
           Transaction<String> transaction = Transaction.stringTerminated(
-              usbPort.inputStream, Uint8List.fromList([13, 10]));
+              usbPort!.inputStream!, Uint8List.fromList([13, 10]));
           var response = await transaction.transaction(
-              usbPort,
+              usbPort!,
               Uint8List.fromList(
-                  ("set country " + country).codeUnits + [13, 10]),
+                  ("set country " + country!).codeUnits + [13, 10]),
               Duration(seconds: 1));
           print("received = $response");
           response = await transaction.transaction(
-              usbPort,
+              usbPort!,
               Uint8List.fromList(
-                  ("set channel " + channelFieldValue).codeUnits + [13, 10]),
+                  ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
               Duration(seconds: 1));
           print("received = $response");
           transaction.dispose();
         }
         // Listen packets from serial and save
         pcapTransaction = Transaction.terminated(
-            usbPort.inputStream, Uint8List.fromList("<STOP>".codeUnits));
-        pcapTransaction.stream.listen((Uint8List data) {
-          file.writeAsBytesSync(data, mode: FileMode.append, flush: true);
+            usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
+        pcapTransaction!.stream.listen((Uint8List data) {
+          file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
           rawPacketsList.add(data);
         });
         String apMac = networksMap[ssidFieldValue]["BSSID"];
         if (eviltwinCheck == false)
-          await usbPort.write(Uint8List.fromList(
+          await usbPort!.write(Uint8List.fromList(
               ("wifi_deauth $macFieldValue $apMac").codeUnits + [13, 10]));
         else
-          await usbPort.write(Uint8List.fromList(
+          await usbPort!.write(Uint8List.fromList(
               ("wifi_deauth $macFieldValue $apMac $ssidFieldValue").codeUnits +
                   [13, 10]));
         if (mounted) {
@@ -281,7 +279,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           ssidFieldValue != "None" &&
           ssidFieldValue != "") {
         outputList = outputList
-            .where((pkt) => pkt["SSID"].contains(ssidFieldValue))
+            .where((pkt) => pkt["SSID"]!.contains(ssidFieldValue!))
             .toList();
       }
       if (macFieldValue != null &&
@@ -289,16 +287,16 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           macFieldValue != "") {
         outputList = outputList
             .where((pkt) =>
-                pkt["MAC1"].contains(macFieldValue) ||
-                pkt["MAC2"].contains(macFieldValue) ||
-                pkt["MAC3"].contains(macFieldValue))
+                pkt["MAC1"]!.contains(macFieldValue!) ||
+                pkt["MAC2"]!.contains(macFieldValue!) ||
+                pkt["MAC3"]!.contains(macFieldValue!))
             .toList();
       }
       if (typeFieldValue != null &&
           typeFieldValue != "None" &&
           typeFieldValue != "") {
         outputList = outputList
-            .where((pkt) => pkt["TYPE"].contains(typeFieldValue))
+            .where((pkt) => pkt["TYPE"]!.contains(typeFieldValue!))
             .toList();
       }
     });
@@ -329,7 +327,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                   children: [
                     FittedBox(
                       fit: BoxFit.fitWidth,
-                      child: Text(outputList[index]["PKT"],
+                      child: Text(outputList[index]["PKT"]!,
                           style: TextStyle(fontFeatures: [
                             FontFeature.tabularFigures(),
                           ])),
@@ -384,7 +382,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                             child: Text(value, overflow: TextOverflow.ellipsis),
                           );
                         }).toList(),
-                        onChanged: (deauthing)
+                        onChanged: (deauthing!)
                             ? null
                             : (dynamic newValue) {
                                 setState(() {
@@ -424,7 +422,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                             child: new Text(value),
                           );
                         }).toList(),
-                        onChanged: (deauthing)
+                        onChanged: (deauthing!)
                             ? null
                             : (dynamic newValue) {
                                 setState(() {
@@ -434,9 +432,9 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                       macFieldValue != "" &&
                                       macFieldValue != "None") {
                                     outputSsidsList = [""];
-                                    if (macFieldValue.toLowerCase() ==
+                                    if (macFieldValue!.toLowerCase() ==
                                             "ff:ff:ff:ff:ff:ff" ||
-                                        macFieldValue.toLowerCase() ==
+                                        macFieldValue!.toLowerCase() ==
                                             "ff-ff-ff-ff-ff-ff") {
                                       outputSsidsList = ssidsList;
                                     } else {
@@ -444,7 +442,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                         for (String sta
                                             in networksMap[key]["STAs"].keys) {
                                           if (sta.toLowerCase() ==
-                                                  macFieldValue.toLowerCase() &&
+                                                  macFieldValue!
+                                                      .toLowerCase() &&
                                               !outputSsidsList.contains(key)) {
                                             outputSsidsList.add(key);
                                             break;
@@ -474,12 +473,12 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                             )),
                         items: outputTypesList.map((String value) {
                           return new DropdownMenuItem<String>(
-                            value: (value != null) ? value : "",
-                            child: new Text((value != null) ? value : "",
+                            value: value,
+                            child: new Text(value,
                                 overflow: TextOverflow.ellipsis),
                           );
                         }).toList(),
-                        onChanged: (deauthing)
+                        onChanged: (deauthing!)
                             ? null
                             : (dynamic newValue) {
                                 setState(() {
@@ -492,9 +491,9 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                     child: CheckboxListTile(
                   title: Text("EvilTwin"),
                   value: eviltwinCheck,
-                  onChanged: (bool newValue) {
+                  onChanged: (bool? newValue) {
                     setState(() {
-                      eviltwinCheck = newValue;
+                      eviltwinCheck = newValue!;
                     });
                   },
                   controlAffinity:
@@ -502,7 +501,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                 ))
               ],
             ),
-            (deauthing)
+            (deauthing!)
                 ? CircularProgressIndicator()
                 : Expanded(
                     child:
