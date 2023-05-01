@@ -87,10 +87,22 @@ class _MapPageState extends State<MapPage> {
                     ),
                     subtitle: Text(
                         "${networksMap[ssids[ssidsPosition]]['BSSID']} - ${networksMap[ssids[ssidsPosition]]['VENDOR']}"),
-                    leading: Icon(
-                      Icons.business,
-                      size: 20.0,
-                      color: Colors.lightGreen,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    trailing: IconButton(
+                      icon: Icon(
+                        (networksMap[ssids[ssidsPosition]]['VENDOR'] != "")
+                            ? Icons.devices_other
+                            : Icons.device_unknown,
+                        size: 20.0,
+                        color: Colors.lightGreen,
+                      ),
+                      onPressed: () async {
+                        //  action
+                        networksMap[ssids[ssidsPosition]]['VENDOR'] =
+                            await fetchVendor(
+                                networksMap[ssids[ssidsPosition]]['BSSID']);
+                        setState(() {});
+                      },
                     ),
                     children: <Widget>[
                       ListView.separated(
@@ -109,16 +121,23 @@ class _MapPageState extends State<MapPage> {
                                   networksMap[ssids[ssidsPosition]]["STAs"]
                                       [sta],
                                   textAlign: TextAlign.center),
-                              /*trailing: IconButton(
+                              trailing: IconButton(
                                 icon: Icon(
-                                  Icons.????,
+                                  (networksMap[ssids[ssidsPosition]]["STAs"]
+                                              [sta] !=
+                                          "")
+                                      ? Icons.devices_other
+                                      : Icons.device_unknown,
                                   size: 20.0,
                                   color: Colors.lightGreen,
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   //  action
+                                  networksMap[ssids[ssidsPosition]]["STAs"]
+                                      [sta] = await fetchVendor(sta);
+                                  setState(() {});
                                 },
-                              ),*/
+                              ),
                             );
                           },
                           itemCount:

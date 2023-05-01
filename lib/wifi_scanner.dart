@@ -174,9 +174,9 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
                 "BSSID": network["BSSID"],
                 "VENDOR": "",
                 "CHANNEL": network["CHANNEL"],
-                "STAs": [
-                  {"MAC": "ff:ff:ff:ff:ff:ff", "VENDOR": "None"}
-                ]
+                "STAs": {
+                  "ff:ff:ff:ff:ff:ff": "None",
+                }
               };
             }
           });
