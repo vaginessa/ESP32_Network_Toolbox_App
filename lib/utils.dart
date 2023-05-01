@@ -39,16 +39,18 @@ _makeToast(msg) {
 }
 
 createDir() async {
-  if (await Permission.storage.request().isGranted) {
+  if (await Permission.manageExternalStorage.request().isGranted) {
     Directory? baseDir = await getExternalStorageDirectory();
+    baseDir = baseDir!.parent.parent.parent.parent;
     String dirToBeCreated = "ESP32_Network_Toolbox";
-    String finalDir = Path.join(baseDir!.path, dirToBeCreated);
-    fileDir = Directory(finalDir);
-    bool dirExists = await fileDir!.exists();
-    if (!dirExists) {
+    String finalDirStr = Path.join(baseDir.path, dirToBeCreated);
+    fileDir = Directory(finalDirStr);
+    if (!await Directory(finalDirStr).exists()) {
+      _makeToast("Data directory doesn't exists, creating it...");
       fileDir!.create();
     }
   } else {
+    debugPrint("Can't access to Images directory...");
     _makeToast("Can't access to directory...");
   }
 }

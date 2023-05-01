@@ -317,7 +317,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         outputTypesList = [""];
         typeFieldValue = null;
       });
-      file = await localFile("Sniffer", "pcap");
+      file = await localFile("Wifi_sniffer", "pcap");
       if (file != null) {
         if (currSSID.length == 0) {
           // Configure ESP sniffer
@@ -352,6 +352,8 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
             sniffing = true;
           });
         }
+      } else {
+        debugPrint("Error creating file\n");
       }
     }
   }

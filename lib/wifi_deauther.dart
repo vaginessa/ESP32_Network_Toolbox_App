@@ -111,16 +111,21 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   }
 
   void parsePacket(Uint8List data) {
-    if (data.length > 15) {
+    if (data.length > 12) {
+      int pktLen = data[12];
+      if (data.length < 16 + pktLen) {
+        return;
+      }
       Uint8List rawPacket = data.sublist(16);
       String typeStr = pktsTypes[rawPacket[0] & 0xfc]!; // clear 2 first bits
       int toDS =
           (rawPacket[1] & 0x3) >> 0x1; // get the first of the 2 first bits
       int fromDS =
           (rawPacket[1] & 0x3) & 0x1; // get the last of the 2 first bits
-      String mac1Mean = "None";
-      String mac2Mean = "None";
-      String mac3Mean = "None";
+
+      String mac1Mean = "";
+      String mac2Mean = "";
+      String mac3Mean = "";
       if (toDS == 0 && fromDS == 0) {
         mac1Mean = "RA=DA";
         mac2Mean = "TA=SA";
@@ -138,9 +143,9 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         mac2Mean = "TA";
         mac3Mean = "DA";
       }
-      String mac1 = "None";
-      String mac2 = "None";
-      String mac3 = "None";
+      String mac1 = "";
+      String mac2 = "";
+      String mac3 = "";
       if (rawPacket.length > 24) {
         mac1 = uint8listToMacString(rawPacket.sublist(4, 10));
         if (!outputMacsList.contains(mac1)) {
@@ -227,7 +232,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         outputList.clear();
         outputTypesList = [""];
       });
-      file = await localFile("Deauther", 'pcap');
+      file = await localFile("Wifi_deauther", 'pcap');
       if (file != null) {
         if (currSSID.length == 0) {
           // Configure ESP deauther

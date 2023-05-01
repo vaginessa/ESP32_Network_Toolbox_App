@@ -20,7 +20,7 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     fetchingVendors = false;
-    getVendors();
+    //getVendors();
   }
 
   void dispose() {
@@ -87,6 +87,11 @@ class _MapPageState extends State<MapPage> {
                     ),
                     subtitle: Text(
                         "${networksMap[ssids[ssidsPosition]]['BSSID']} - ${networksMap[ssids[ssidsPosition]]['VENDOR']}"),
+                    leading: Icon(
+                      Icons.business,
+                      size: 20.0,
+                      color: Colors.lightGreen,
+                    ),
                     children: <Widget>[
                       ListView.separated(
                           separatorBuilder: (context, index) => Divider(
@@ -104,6 +109,16 @@ class _MapPageState extends State<MapPage> {
                                   networksMap[ssids[ssidsPosition]]["STAs"]
                                       [sta],
                                   textAlign: TextAlign.center),
+                              /*trailing: IconButton(
+                                icon: Icon(
+                                  Icons.????,
+                                  size: 20.0,
+                                  color: Colors.lightGreen,
+                                ),
+                                onPressed: () {
+                                  //  action
+                                },
+                              ),*/
                             );
                           },
                           itemCount:
