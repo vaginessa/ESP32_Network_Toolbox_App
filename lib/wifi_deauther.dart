@@ -422,7 +422,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                     flex: 5,
                     child: DropdownButton(
                         value: macFieldValue,
-                        hint: Text("MAC"),
+                        hint: Text("MAC",
+                            style: TextStyle(
+                              fontSize: 25,
+                            )),
                         items: outputMacsList.map((String value) {
                           return new DropdownMenuItem<String>(
                             value: value,
