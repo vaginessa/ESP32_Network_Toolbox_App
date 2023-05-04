@@ -375,6 +375,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
+                    flex: 5,
                     child: DropdownButton<String>(
                         value: ssidFieldValue,
                         hint: Text("SSID",
@@ -418,6 +419,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                 execFilters();
                               })),
                 Expanded(
+                    flex: 5,
                     child: DropdownButton(
                         value: macFieldValue,
                         hint: Text("MAC"),
@@ -469,6 +471,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
+                    flex: 5,
                     child: DropdownButton<String>(
                         isExpanded: true,
                         value: typeFieldValue,
@@ -493,17 +496,18 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                 execFilters();
                               })),
                 Expanded(
+                    flex: 5,
                     child: CheckboxListTile(
-                  title: Text("EvilTwin"),
-                  value: eviltwinCheck,
-                  onChanged: (bool? newValue) {
-                    setState(() {
-                      eviltwinCheck = newValue!;
-                    });
-                  },
-                  controlAffinity:
-                      ListTileControlAffinity.leading, //  <-- leading Checkbox
-                ))
+                      title: Text("EvilTwin"),
+                      value: eviltwinCheck,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          eviltwinCheck = newValue!;
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity
+                          .leading, //  <-- leading Checkbox
+                    ))
               ],
             ),
             (deauthing!)

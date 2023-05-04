@@ -280,74 +280,83 @@ class _WifiScannerPageState extends State<WifiScannerPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 6.0),
-                                    child: Text(
-                                      networksList[position]["SSID"] ?? "None",
-                                      style: TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 6.0),
-                                    child: Text(
-                                      networksList[position]["BSSID"] ?? "None",
-                                      style: TextStyle(fontSize: 18.0),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        12.0, 6.0, 12.0, 12.0),
-                                    child: Text(
-                                      networksList[position]["AUTH_MODE"] ??
-                                          "None",
-                                      style: TextStyle(fontSize: 18.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
+                              Expanded(
+                                flex: 7,
                                 child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Text(
-                                      "chan: " +
-                                          networksList[position]["CHANNEL"]
-                                              .toString(),
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                    Text(
-                                      "rssi: " +
-                                          networksList[position]["RSSI"]
-                                              .toString(),
-                                      style: TextStyle(color: Colors.grey),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 6.0),
+                                      child: Text(
+                                        networksList[position]["SSID"] ??
+                                            "None",
+                                        style: TextStyle(
+                                            fontSize: 22.0,
+                                            fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: new IconButton(
-                                        icon: new Icon((networksList[position]
-                                                ["CONNECTED"])
-                                            ? Icons.wifi_off
-                                            : Icons.wifi),
-                                        onPressed: (scanning == false)
-                                            ? () {
-                                                _openPopup(
-                                                    networksList[position]
-                                                        ["SSID"],
-                                                    context);
-                                              }
-                                            : null,
+                                      padding: const EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 6.0),
+                                      child: Text(
+                                        networksList[position]["BSSID"] ??
+                                            "None",
+                                        style: TextStyle(fontSize: 18.0),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          12.0, 6.0, 12.0, 12.0),
+                                      child: Text(
+                                        networksList[position]["AUTH_MODE"] ??
+                                            "None",
+                                        style: TextStyle(fontSize: 18.0),
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      Text(
+                                        "chan: " +
+                                            networksList[position]["CHANNEL"]
+                                                .toString(),
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                      Text(
+                                        "rssi: " +
+                                            networksList[position]["RSSI"]
+                                                .toString(),
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: new IconButton(
+                                          icon: new Icon((networksList[position]
+                                                  ["CONNECTED"])
+                                              ? Icons.wifi_off
+                                              : Icons.wifi),
+                                          onPressed: (scanning == false)
+                                              ? () {
+                                                  _openPopup(
+                                                      networksList[position]
+                                                          ["SSID"],
+                                                      context);
+                                                }
+                                              : null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-
 import 'package:http/http.dart';
-
-import 'utils.dart';
 import 'constants.dart';
 
 class MapPage extends StatefulWidget {
@@ -14,13 +10,9 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  bool? fetchingVendors;
-
   @override
   void initState() {
     super.initState();
-    fetchingVendors = false;
-    //getVendors();
   }
 
   void dispose() {
@@ -38,114 +30,81 @@ class _MapPageState extends State<MapPage> {
     return "None";
   }
 
-  void getVendors() async {
-    if (mounted) {
-      setState(() {
-        fetchingVendors = true;
-      });
-    }
-    for (String key in networksMap.keys) {
-      if (networksMap[key]["VENDOR"] == "") {
-        networksMap[key]["VENDOR"] =
-            await fetchVendor(networksMap[key]["BSSID"]);
-      }
-      for (String sta in networksMap[key]["STAs"].keys) {
-        if (networksMap[key]["STAs"][sta] == "") {
-          networksMap[key]["STAs"][sta] = await fetchVendor(sta);
-        }
-      }
-    }
-    await Future.delayed(const Duration(seconds: 1), () {});
-    if (mounted) {
-      setState(() {
-        fetchingVendors = false;
-      });
-    }
-    String json = jsonEncode(networksMap);
-    final file = await localFile("Network_Map", "json");
-    await file!.writeAsString(json);
-  }
-
   Widget ssidsBuilder() {
-    return (fetchingVendors!)
-        ? Visibility(
-            maintainSize: false,
-            maintainAnimation: true,
-            maintainState: true,
-            visible: fetchingVendors!,
-            child: Container(
-                margin: EdgeInsets.only(top: 50, bottom: 30),
-                child: CircularProgressIndicator()))
-        : Expanded(
-            child: ListView.builder(
-                itemBuilder: (context, ssidsPosition) {
-                  return ExpansionTile(
-                    title: Text(
-                      "${ssids[ssidsPosition]} - chan: ${networksMap[ssids[ssidsPosition]]['CHANNEL']}",
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                        "${networksMap[ssids[ssidsPosition]]['BSSID']} - ${networksMap[ssids[ssidsPosition]]['VENDOR']}"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    trailing: IconButton(
-                      icon: Icon(
-                        (networksMap[ssids[ssidsPosition]]['VENDOR'] != "")
-                            ? Icons.devices_other
-                            : Icons.device_unknown,
-                        size: 20.0,
-                        color: Colors.lightGreen,
-                      ),
-                      onPressed: () async {
-                        //  action
-                        networksMap[ssids[ssidsPosition]]['VENDOR'] =
-                            await fetchVendor(
-                                networksMap[ssids[ssidsPosition]]['BSSID']);
-                        setState(() {});
+    ScrollController _controller = new ScrollController();
+    return Expanded(
+        child: ListView.builder(
+            itemBuilder: (context, ssidsPosition) {
+              return ExpansionTile(
+                title: Text(
+                  "${ssids[ssidsPosition]} - chan: ${networksMap[ssids[ssidsPosition]]['CHANNEL']}",
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  "${networksMap[ssids[ssidsPosition]]['BSSID']} - ${networksMap[ssids[ssidsPosition]]['VENDOR']}",
+                  overflow: TextOverflow.ellipsis,
+                ),
+                controlAffinity: ListTileControlAffinity.leading,
+                trailing: IconButton(
+                  icon: Icon(
+                    (networksMap[ssids[ssidsPosition]]['VENDOR'] != "")
+                        ? Icons.devices_other
+                        : Icons.device_unknown,
+                    size: 20.0,
+                    color: Colors.lightGreen,
+                  ),
+                  onPressed: () async {
+                    //  action
+                    networksMap[ssids[ssidsPosition]]['VENDOR'] =
+                        await fetchVendor(
+                            networksMap[ssids[ssidsPosition]]['BSSID']);
+                    setState(() {});
+                  },
+                ),
+                children: <Widget>[
+                  ListView.separated(
+                      controller: _controller,
+                      separatorBuilder: (context, index) => Divider(
+                            color: Colors.black,
+                          ),
+                      shrinkWrap: true,
+                      itemBuilder: (context, stasPosition) {
+                        String sta = networksMap[ssids[ssidsPosition]]["STAs"]
+                            .keys
+                            .elementAt(stasPosition);
+                        return ListTile(
+                          title: Text(
+                            sta,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                              networksMap[ssids[ssidsPosition]]["STAs"][sta],
+                              textAlign: TextAlign.center),
+                          trailing: IconButton(
+                            icon: Icon(
+                              (networksMap[ssids[ssidsPosition]]["STAs"][sta] !=
+                                      "")
+                                  ? Icons.devices_other
+                                  : Icons.device_unknown,
+                              size: 20.0,
+                              color: Colors.lightGreen,
+                            ),
+                            onPressed: () async {
+                              //  action
+                              networksMap[ssids[ssidsPosition]]["STAs"][sta] =
+                                  await fetchVendor(sta);
+                              setState(() {});
+                            },
+                          ),
+                        );
                       },
-                    ),
-                    children: <Widget>[
-                      ListView.separated(
-                          separatorBuilder: (context, index) => Divider(
-                                color: Colors.black,
-                              ),
-                          shrinkWrap: true,
-                          itemBuilder: (context, stasPosition) {
-                            String sta = networksMap[ssids[ssidsPosition]]
-                                    ["STAs"]
-                                .keys
-                                .elementAt(stasPosition);
-                            return ListTile(
-                              title: Text(sta, textAlign: TextAlign.center),
-                              subtitle: Text(
-                                  networksMap[ssids[ssidsPosition]]["STAs"]
-                                      [sta],
-                                  textAlign: TextAlign.center),
-                              trailing: IconButton(
-                                icon: Icon(
-                                  (networksMap[ssids[ssidsPosition]]["STAs"]
-                                              [sta] !=
-                                          "")
-                                      ? Icons.devices_other
-                                      : Icons.device_unknown,
-                                  size: 20.0,
-                                  color: Colors.lightGreen,
-                                ),
-                                onPressed: () async {
-                                  //  action
-                                  networksMap[ssids[ssidsPosition]]["STAs"]
-                                      [sta] = await fetchVendor(sta);
-                                  setState(() {});
-                                },
-                              ),
-                            );
-                          },
-                          itemCount:
-                              networksMap[ssids[ssidsPosition]]["STAs"].length),
-                    ],
-                  );
-                },
-                itemCount: ssids.length));
+                      itemCount:
+                          networksMap[ssids[ssidsPosition]]["STAs"].length),
+                ],
+              );
+            },
+            itemCount: ssids.length));
   }
 
   @override

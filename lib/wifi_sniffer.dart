@@ -418,12 +418,15 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
+                    flex: 5,
                     child: DropdownButton<String>(
                         value: ssidFieldValue,
-                        hint: Text("SSID",
-                            style: TextStyle(
-                              fontSize: 25,
-                            )),
+                        hint: Text(
+                          "SSID",
+                          style: TextStyle(
+                            fontSize: 25,
+                          ),
+                        ),
                         items: outputSsidsList.map((String value) {
                           return new DropdownMenuItem<String>(
                             value: value,
@@ -467,6 +470,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                 });
                               })),
                 Expanded(
+                    flex: 5,
                     child: DropdownButton<String>(
                         value: macFieldValue,
                         hint: Text("MAC",
@@ -509,78 +513,85 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
             ),
             Row(
               children: [
-                DropdownButton<String>(
-                    value: typeFieldValue,
-                    hint: Text("PKT TYPE",
-                        style: TextStyle(
-                          fontSize: 25,
-                        )),
-                    items: outputTypesList.map((String value) {
-                      return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(value, overflow: TextOverflow.ellipsis),
-                      );
-                    }).toList(),
-                    onChanged: (sniffing!)
-                        ? null
-                        : (dynamic newValue) {
-                            setState(() {
-                              ssidFieldValue = null;
-                              typeFieldValue =
-                                  (newValue.length > 0) ? newValue : null;
-                              filtersList["TYPE"] = typeFieldValue!;
-                              execFilters();
-                              if (macFieldValue != null) {
-                                outputSsidsList = ssidsList
-                                    .where((string) => outputList.any(
-                                        (element) =>
-                                            element["SSID"]!.contains(string)))
-                                    .toList();
-                                outputMacsList = macsList
-                                    .where((string) => outputList.any(
-                                        (element) =>
-                                            element["MAC1"]!
-                                                .toLowerCase()
-                                                .contains(
-                                                    string.toLowerCase()) ||
-                                            element["MAC2"]!
-                                                .toLowerCase()
-                                                .contains(
-                                                    string.toLowerCase()) ||
-                                            element["MAC3"]!
-                                                .toLowerCase()
-                                                .contains(
-                                                    string.toLowerCase())))
-                                    .toList();
-                              } else {
-                                outputSsidsList = ssidsList;
-                                outputMacsList = macsList;
-                              }
-                            });
-                          }),
                 Expanded(
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: Text("CHAN: ",
-                            style: TextStyle(
-                                fontSize: 25, color: Colors.grey[700])))),
-                DropdownButton<String>(
-                  value: channelFieldValue,
-                  onChanged: (sniffing!)
-                      ? null
-                      : (String? newValue) {
-                          setState(() {
-                            channelFieldValue = newValue;
-                          });
-                        },
-                  items: channelsList
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, style: TextStyle(fontSize: 25)),
-                    );
-                  }).toList(),
+                  flex: 5,
+                  child: DropdownButton<String>(
+                      value: typeFieldValue,
+                      hint: Text("PKT TYPE",
+                          style: TextStyle(
+                            fontSize: 25,
+                          )),
+                      items: outputTypesList.map((String value) {
+                        return new DropdownMenuItem<String>(
+                          value: value,
+                          child:
+                              new Text(value, overflow: TextOverflow.ellipsis),
+                        );
+                      }).toList(),
+                      onChanged: (sniffing!)
+                          ? null
+                          : (dynamic newValue) {
+                              setState(() {
+                                ssidFieldValue = null;
+                                typeFieldValue =
+                                    (newValue.length > 0) ? newValue : null;
+                                filtersList["TYPE"] = typeFieldValue!;
+                                execFilters();
+                                if (macFieldValue != null) {
+                                  outputSsidsList = ssidsList
+                                      .where((string) => outputList.any(
+                                          (element) => element["SSID"]!
+                                              .contains(string)))
+                                      .toList();
+                                  outputMacsList = macsList
+                                      .where((string) => outputList.any(
+                                          (element) =>
+                                              element["MAC1"]!
+                                                  .toLowerCase()
+                                                  .contains(
+                                                      string.toLowerCase()) ||
+                                              element["MAC2"]!
+                                                  .toLowerCase()
+                                                  .contains(
+                                                      string.toLowerCase()) ||
+                                              element["MAC3"]!
+                                                  .toLowerCase()
+                                                  .contains(
+                                                      string.toLowerCase())))
+                                      .toList();
+                                } else {
+                                  outputSsidsList = ssidsList;
+                                  outputMacsList = macsList;
+                                }
+                              });
+                            }),
                 ),
+                Expanded(
+                    flex: 5,
+                    child: Row(children: [
+                      Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("CHAN: ",
+                              style: TextStyle(
+                                  fontSize: 25, color: Colors.grey[700]))),
+                      DropdownButton<String>(
+                        value: channelFieldValue,
+                        onChanged: (sniffing!)
+                            ? null
+                            : (String? newValue) {
+                                setState(() {
+                                  channelFieldValue = newValue;
+                                });
+                              },
+                        items: channelsList
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: TextStyle(fontSize: 25)),
+                          );
+                        }).toList(),
+                      )
+                    ])),
               ],
             ),
             (sniffing!)
