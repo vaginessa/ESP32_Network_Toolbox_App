@@ -499,18 +499,47 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                 execFilters();
                               })),
                 Expanded(
-                    flex: 5,
-                    child: CheckboxListTile(
-                      title: Text("EvilTwin"),
+                    flex: 3,
+                    child: Column(children: [
+                      Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("CHAN: ",
+                              style: TextStyle(
+                                  fontSize: 25, color: Colors.grey[700]))),
+                      DropdownButton<String>(
+                        value: channelFieldValue,
+                        onChanged: (deauthing!)
+                            ? null
+                            : (String? newValue) {
+                                setState(() {
+                                  channelFieldValue = newValue;
+                                });
+                              },
+                        items: channelsList
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: TextStyle(fontSize: 25)),
+                          );
+                        }).toList(),
+                      )
+                    ])),
+                Expanded(
+                  flex: 2,
+                  child: Column(children: [
+                    Text("EvilTwin",
+                        style:
+                            TextStyle(fontSize: 20, color: Colors.grey[700])),
+                    CheckboxListTile(
                       value: eviltwinCheck,
                       onChanged: (bool? newValue) {
                         setState(() {
                           eviltwinCheck = newValue!;
                         });
                       },
-                      controlAffinity: ListTileControlAffinity
-                          .leading, //  <-- leading Checkbox
-                    ))
+                    )
+                  ]),
+                )
               ],
             ),
             (deauthing!)
