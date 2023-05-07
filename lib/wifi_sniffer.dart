@@ -420,6 +420,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                 Expanded(
                     flex: 5,
                     child: DropdownButton<String>(
+                        isExpanded: true,
                         value: ssidFieldValue,
                         hint: Text(
                           "SSID",

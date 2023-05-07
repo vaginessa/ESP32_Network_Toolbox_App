@@ -51,6 +51,51 @@ List<String> channelsList = [
   "14"
 ];
 
+List<String> reasonsList = [
+  "Reserved",
+  "Unspecified reason",
+  "Previous authentication no longer valid",
+  "Deauthenticated because sending station (STA) is leaving or has left Independent Basic Service Set (IBSS) or ESS",
+  "Disassociated due to inactivity",
+  "Disassociated because WAP device is unable to handle all currently associated STAs",
+  "Class 2 frame received from nonauthenticated STA",
+  "Class 3 frame received from nonassociated STA",
+  "Disassociated because sending STA is leaving or has left Basic Service Set (BSS)",
+  "STA requesting (re)association is not authenticated with responding STA",
+  "Disassociated because the information in the Power Capability element is unacceptable",
+  "Disassociated because the information in the Supported Channels element is unacceptable",
+  "Disassociated due to BSS Transition Management",
+  "Invalid element, that is, an element defined in this standard for which the content does not meet the specifications in Clause 8",
+  "Message integrity code (MIC) failure",
+  "4-Way Handshake timeout",
+  "Group Key Handshake timeout",
+  "Element in 4-Way Handshake different from (Re)Association Request/ Probe Response/Beacon frame",
+  "Invalid group cipher",
+  "Invalid pairwise cipher",
+  "Invalid AKMP",
+  "Unsupported RSNE version",
+  "Invalid RSNE capabilities",
+  "IEEE 802.1X authentication failed",
+  "Cipher suite rejected because of the security policy",
+];
+
+List<int> delaysList = [
+  1000,
+  900,
+  800,
+  700,
+  600,
+  500,
+  400,
+  300,
+  200,
+  100,
+  50,
+  20,
+  10,
+  0
+];
+
 Map<int, String> pktsTypes = {
   0x0: "Mgmt-Association Request", // 00000000
   0x10: "Mgmt-Association Response", // 00010000

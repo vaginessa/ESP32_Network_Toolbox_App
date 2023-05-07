@@ -34,6 +34,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
   String? channelFieldValue;
   String? typeFieldValue;
   bool eviltwinCheck = false;
+  String reasonFieldValue = "Unspecified reason";
+  int? delayFieldValue = 1000;
 
   @override
   void initState() {
@@ -260,12 +262,17 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           rawPacketsList.add(data);
         });
         String apMac = networksMap[ssidFieldValue]["BSSID"];
+        int reasonFieldIndex = reasonsList.indexOf(reasonFieldValue);
+        String ssidCleanedValue = ssidFieldValue!.replaceAll(RegExp(' +'), '_');
         if (eviltwinCheck == false)
           await usbPort!.write(Uint8List.fromList(
-              ("wifi_deauth $macFieldValue $apMac").codeUnits + [13, 10]));
+              ("wifi_deauth $macFieldValue $apMac None ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
+                      .codeUnits +
+                  [13, 10]));
         else
           await usbPort!.write(Uint8List.fromList(
-              ("wifi_deauth $macFieldValue $apMac $ssidFieldValue").codeUnits +
+              ("wifi_deauth $macFieldValue $apMac $ssidCleanedValue ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
+                      .codeUnits +
                   [13, 10]));
         if (mounted) {
           setState(() {
@@ -377,6 +384,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                 Expanded(
                     flex: 5,
                     child: DropdownButton<String>(
+                        isExpanded: true,
                         value: ssidFieldValue,
                         hint: Text("SSID",
                             style: TextStyle(
@@ -499,8 +507,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                 execFilters();
                               })),
                 Expanded(
-                    flex: 3,
-                    child: Column(children: [
+                    flex: 5,
+                    child: Row(children: [
                       Padding(
                           padding: const EdgeInsets.only(left: 20.0),
                           child: Text("CHAN: ",
@@ -523,6 +531,77 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                           );
                         }).toList(),
                       )
+                    ])),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                    flex: 5,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("REASON: ",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 25, color: Colors.grey[700])),
+                          DropdownButton<String>(
+                              isExpanded: true,
+                              value: reasonFieldValue,
+                              items: reasonsList.map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                return new DropdownMenuItem<String>(
+                                    value: value,
+                                    child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(children: [
+                                          Text(value,
+                                              overflow: TextOverflow.ellipsis),
+                                        ])));
+                              }).toList(),
+                              onChanged: (deauthing!)
+                                  ? null
+                                  : (dynamic newValue) {
+                                      setState(() {
+                                        reasonFieldValue = (newValue.length > 0)
+                                            ? newValue
+                                            : null;
+                                      });
+                                    })
+                        ])),
+                Expanded(
+                    flex: 3,
+                    child: Column(children: [
+                      Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("DELAY: ",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.grey[700]))),
+                      DropdownButton<int>(
+                        value: delayFieldValue,
+                        onChanged: (deauthing!)
+                            ? null
+                            : (int? newValue) {
+                                setState(() {
+                                  delayFieldValue = newValue;
+                                });
+                              },
+                        items:
+                            delaysList.map<DropdownMenuItem<int>>((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text(value.toString(),
+                                style: TextStyle(fontSize: 25)),
+                          );
+                        }).toList(),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("ms",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.grey[700]))),
                     ])),
                 Expanded(
                   flex: 2,
