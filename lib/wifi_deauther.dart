@@ -235,51 +235,52 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         outputTypesList = [""];
       });
       file = await localFile("Wifi_deauther", 'pcap');
-      if (file != null) {
-        if (currSSID.length == 0) {
-          // Configure ESP deauther
-          Transaction<String> transaction = Transaction.stringTerminated(
-              usbPort!.inputStream!, Uint8List.fromList([13, 10]));
-          var response = await transaction.transaction(
-              usbPort!,
-              Uint8List.fromList(
-                  ("set country " + country!).codeUnits + [13, 10]),
-              Duration(seconds: 1));
-          print("received = $response");
-          response = await transaction.transaction(
-              usbPort!,
-              Uint8List.fromList(
-                  ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
-              Duration(seconds: 1));
-          print("received = $response");
-          transaction.dispose();
-        }
-        // Listen packets from serial and save
-        pcapTransaction = Transaction.terminated(
-            usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
-        pcapTransaction!.stream.listen((Uint8List data) {
+
+      if (currSSID.length == 0) {
+        // Configure ESP deauther
+        Transaction<String> transaction = Transaction.stringTerminated(
+            usbPort!.inputStream!, Uint8List.fromList([13, 10]));
+        var response = await transaction.transaction(
+            usbPort!,
+            Uint8List.fromList(
+                ("set country " + country!).codeUnits + [13, 10]),
+            Duration(seconds: 1));
+        print("received = $response");
+        response = await transaction.transaction(
+            usbPort!,
+            Uint8List.fromList(
+                ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
+            Duration(seconds: 1));
+        print("received = $response");
+        transaction.dispose();
+      }
+      // Listen packets from serial and save
+      pcapTransaction = Transaction.terminated(
+          usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
+      pcapTransaction!.stream.listen((Uint8List data) {
+        if (file != null) {
           file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
-          rawPacketsList.add(data);
-        });
-        String apMac = networksMap[ssidFieldValue]["BSSID"];
-        int reasonFieldIndex = reasonsList.indexOf(reasonFieldValue);
-        String ssidCleanedValue = ssidFieldValue!.replaceAll(RegExp(' +'), '_');
-        if (eviltwinCheck == false)
-          await usbPort!.write(Uint8List.fromList(
-              ("wifi_deauth $macFieldValue $apMac None ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
-                      .codeUnits +
-                  [13, 10]));
-        else
-          await usbPort!.write(Uint8List.fromList(
-              ("wifi_deauth $macFieldValue $apMac $ssidCleanedValue ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
-                      .codeUnits +
-                  [13, 10]));
-        if (mounted) {
-          setState(() {
-            iconData = Icons.portable_wifi_off;
-            deauthing = true;
-          });
         }
+        rawPacketsList.add(data);
+      });
+      String apMac = networksMap[ssidFieldValue]["BSSID"];
+      int reasonFieldIndex = reasonsList.indexOf(reasonFieldValue);
+      String ssidCleanedValue = ssidFieldValue!.replaceAll(RegExp(' +'), '_');
+      if (eviltwinCheck == false)
+        await usbPort!.write(Uint8List.fromList(
+            ("wifi_deauth $macFieldValue $apMac None ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
+                    .codeUnits +
+                [13, 10]));
+      else
+        await usbPort!.write(Uint8List.fromList(
+            ("wifi_deauth $macFieldValue $apMac $ssidCleanedValue ${delayFieldValue.toString()} ${reasonFieldIndex.toString()}")
+                    .codeUnits +
+                [13, 10]));
+      if (mounted) {
+        setState(() {
+          iconData = Icons.portable_wifi_off;
+          deauthing = true;
+        });
       }
     }
   }

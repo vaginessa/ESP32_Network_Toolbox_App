@@ -318,42 +318,43 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         typeFieldValue = null;
       });
       file = await localFile("Wifi_sniffer", "pcap");
-      if (file != null) {
-        if (currSSID.length == 0) {
-          // Configure ESP sniffer
-          Transaction<String> transaction = Transaction.stringTerminated(
-              usbPort!.inputStream!, Uint8List.fromList([13, 10]));
-          var response = await transaction.transaction(
-              usbPort!,
-              Uint8List.fromList(
-                  ("set country " + country!).codeUnits + [13, 10]),
-              Duration(seconds: 1));
-          print("received = $response");
-          response = await transaction.transaction(
-              usbPort!,
-              Uint8List.fromList(
-                  ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
-              Duration(seconds: 1));
-          print("received = $response");
-          transaction.dispose();
-        }
-        // Listen packets from serial and save
-        pcapTransaction = Transaction.terminated(
-            usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
-        pcapTransaction!.stream.listen((Uint8List data) {
+
+      if (currSSID.length == 0) {
+        // Configure ESP sniffer
+        Transaction<String> transaction = Transaction.stringTerminated(
+            usbPort!.inputStream!, Uint8List.fromList([13, 10]));
+        var response = await transaction.transaction(
+            usbPort!,
+            Uint8List.fromList(
+                ("set country " + country!).codeUnits + [13, 10]),
+            Duration(seconds: 1));
+        print("received = $response");
+        response = await transaction.transaction(
+            usbPort!,
+            Uint8List.fromList(
+                ("set channel " + channelFieldValue!).codeUnits + [13, 10]),
+            Duration(seconds: 1));
+        print("received = $response");
+        transaction.dispose();
+      }
+      // Listen packets from serial and save
+      pcapTransaction = Transaction.terminated(
+          usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
+      pcapTransaction!.stream.listen((Uint8List data) {
+        if (file != null) {
           file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
-          rawPacketsList.add(data);
-        });
-        await usbPort!
-            .write(Uint8List.fromList(("wifi_sniff").codeUnits + [13, 10]));
-        if (mounted) {
-          setState(() {
-            iconData = Icons.portable_wifi_off;
-            sniffing = true;
-          });
+        } else {
+          debugPrint("Error creating file\n");
         }
-      } else {
-        debugPrint("Error creating file\n");
+        rawPacketsList.add(data);
+      });
+      await usbPort!
+          .write(Uint8List.fromList(("wifi_sniff").codeUnits + [13, 10]));
+      if (mounted) {
+        setState(() {
+          iconData = Icons.portable_wifi_off;
+          sniffing = true;
+        });
       }
     }
   }
