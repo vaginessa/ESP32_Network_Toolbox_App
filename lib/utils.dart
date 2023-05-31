@@ -11,7 +11,10 @@ import 'package:date_format/date_format.dart';
 import 'constants.dart';
 
 Future<File?> localFile(String name, String ext) async {
-  await createDir();
+  var res = await createDir();
+  if (res == false) {
+    return null;
+  }
   if (fileDir!.existsSync()) {
     var now = new DateTime.now();
     String formattedDate =
@@ -20,6 +23,8 @@ Future<File?> localFile(String name, String ext) async {
     file = File(filePath);
     if (!file!.existsSync()) {
       file!.create();
+    } else {
+      return null;
     }
     return file;
   } else {
@@ -52,7 +57,9 @@ createDir() async {
   } else {
     debugPrint("Can't access to Images directory...");
     _makeToast("Can't access to directory...");
+    return false;
   }
+  return true;
 }
 
 String uint8listToMacString(Uint8List lst) {
