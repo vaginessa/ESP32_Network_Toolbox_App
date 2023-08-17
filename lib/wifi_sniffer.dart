@@ -98,55 +98,6 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
     return true;
   }
 
-  void mapNetworks(Map<String, String> pkt) {
-    String type = pkt["TYPE"]!.split(": ")[1];
-    String ssid = pkt["SSID"]!.split(": ")[1];
-    String dstMac = pkt["MAC1"]!.split(": ")[1];
-    String srcMac = pkt["MAC2"]!.split(": ")[1];
-    String chan = pkt["CHANNEL"]!.split(": ")[1];
-    if (type == "Mgmt-Beacon") {
-      if (!networksMap.containsKey(ssid)) {
-        networksMap[ssid] = {
-          "BSSID": srcMac,
-          "VENDOR": "",
-          "CHANNEL": chan,
-          "STAs": {"ff:ff:ff:ff:ff:ff": "None"}
-        };
-      } else if (!networksMap[ssid]["STAs"].containsKey("ff:ff:ff:ff:ff:ff")) {
-        networksMap[ssid]["STAs"]["ff:ff:ff:ff:ff:ff"] = "None";
-      }
-    } else if (type == "Mgmt-Probe Response") {
-      if (!networksMap.containsKey(ssid)) {
-        networksMap[ssid] = {
-          "BSSID": srcMac,
-          "VENDOR": "",
-          "CHANNEL": chan,
-          "STAs": {dstMac: ""}
-        };
-      } else if (!networksMap[ssid]["STAs"].containsKey(dstMac)) {
-        networksMap[ssid]["STAs"][dstMac] = "";
-      }
-    } else if (type == "Data-QoS Data" ||
-        type == "Data-QoS Null(no data)" ||
-        type == "Data-Null(No data)") {
-      for (String key in networksMap.keys) {
-        if (networksMap[key]["BSSID"] == dstMac) {
-          bool check = false;
-          for (String sta in networksMap[key]["STAs"].keys) {
-            if (sta == srcMac) {
-              check = true;
-              break;
-            }
-          }
-          if (check == false) {
-            networksMap[key]["STAs"][srcMac] = "";
-            break;
-          }
-        }
-      }
-    }
-  }
-
   void parsePacket(Uint8List data) {
     if (data.length > 12) {
       int pktLen = data[12];

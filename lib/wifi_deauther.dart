@@ -192,7 +192,7 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
       pkt["PKT"] = hexView(0, data, printAscii: true);
       // 0 crashes... Issue opened : https://github.com/ninja-dart/hex/issues/1
       // used modified version from https://github.com/EParisot/hex
-
+      mapNetworks(pkt);
       packetsList.add(pkt);
     }
   }

@@ -65,3 +65,52 @@ createDir() async {
 String uint8listToMacString(Uint8List lst) {
   return "${lst[0].toRadixString(16).padLeft(2, '0')}:${lst[1].toRadixString(16).padLeft(2, '0')}:${lst[2].toRadixString(16).padLeft(2, '0')}:${lst[3].toRadixString(16).padLeft(2, '0')}:${lst[4].toRadixString(16).padLeft(2, '0')}:${lst[5].toRadixString(16).padLeft(2, '0')}";
 }
+
+void mapNetworks(Map<String, String> pkt) {
+  String type = pkt["TYPE"]!.split(": ")[1];
+  String ssid = pkt["SSID"]!.split(": ")[1];
+  String dstMac = pkt["MAC1"]!.split(": ")[1];
+  String srcMac = pkt["MAC2"]!.split(": ")[1];
+  String chan = pkt["CHANNEL"]!.split(": ")[1];
+  if (type == "Mgmt-Beacon") {
+    if (!networksMap.containsKey(ssid)) {
+      networksMap[ssid] = {
+        "BSSID": srcMac,
+        "VENDOR": "",
+        "CHANNEL": chan,
+        "STAs": {"ff:ff:ff:ff:ff:ff": "None"}
+      };
+    } else if (!networksMap[ssid]["STAs"].containsKey("ff:ff:ff:ff:ff:ff")) {
+      networksMap[ssid]["STAs"]["ff:ff:ff:ff:ff:ff"] = "None";
+    }
+  } else if (type == "Mgmt-Probe Response") {
+    if (!networksMap.containsKey(ssid)) {
+      networksMap[ssid] = {
+        "BSSID": srcMac,
+        "VENDOR": "",
+        "CHANNEL": chan,
+        "STAs": {dstMac: ""}
+      };
+    } else if (!networksMap[ssid]["STAs"].containsKey(dstMac)) {
+      networksMap[ssid]["STAs"][dstMac] = "";
+    }
+  } else if (type == "Data-QoS Data" ||
+      type == "Data-QoS Null(no data)" ||
+      type == "Data-Null(No data)") {
+    for (String key in networksMap.keys) {
+      if (networksMap[key]["BSSID"] == dstMac) {
+        bool check = false;
+        for (String sta in networksMap[key]["STAs"].keys) {
+          if (sta == srcMac) {
+            check = true;
+            break;
+          }
+        }
+        if (check == false) {
+          networksMap[key]["STAs"][srcMac] = "";
+          break;
+        }
+      }
+    }
+  }
+}
