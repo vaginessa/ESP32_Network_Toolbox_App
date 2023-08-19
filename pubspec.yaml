@@ -93,3 +93,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  
+  # TMP asset (TODO replace by firebase)
+  assets:
+    - assets/esp32_network_toolbox.bin

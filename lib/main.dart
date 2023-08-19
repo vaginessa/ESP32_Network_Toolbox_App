@@ -9,6 +9,7 @@ import 'wifi_scanner.dart';
 import 'wifi_deauther.dart';
 import 'blt_scanner.dart';
 import 'esp_flash.dart';
+//import 'terminal.dart';
 import 'constants.dart';
 
 void main() {
@@ -443,40 +444,28 @@ class _HomePageState extends State<HomePage> {
             },
           ),
         )*/
-        /*(deviceConnected)
-            ? Padding(
-                padding: const EdgeInsets.only(top: 50.0),
-                child: TextButton.icon(
-                  label: Text(
-                    'Flash',
-                    style: TextStyle(fontSize: 25, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                  icon: Icon(
-                    Icons.offline_bolt,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
+        Padding(
+          padding: const EdgeInsets.only(top: 50.0),
+          child: TextButton.icon(
+            label: Text(
+              'Flash',
+              style: TextStyle(
+                  fontSize: 25,
+                  color: (deviceConnected) ? Colors.white : Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            icon: Icon(
+              Icons.offline_bolt,
+              color: (deviceConnected) ? Colors.white : Colors.grey,
+            ),
+            onPressed: (deviceConnected)
+                ? () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => FlashPage()));
-                  },
-                ),
-              )
-            : Padding(
-                padding: const EdgeInsets.only(top: 50.0),
-                child: TextButton.icon(
-                  label: Text(
-                    'Flash',
-                    style: TextStyle(fontSize: 25),
-                    textAlign: TextAlign.center,
-                  ),
-                  icon: Icon(
-                    Icons.offline_bolt,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {},
-                ),
-              ),*/
+                  }
+                : () {},
+          ),
+        ),
       ])),
     );
   }

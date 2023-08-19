@@ -15,6 +15,7 @@ UsbPort? usbPort;
 List<UsbDevice> devicesList = [];
 UsbDevice? device;
 bool deviceConnected = false;
+
 String currSSID = "";
 List<Map<String, dynamic>> bltDevicesList = [];
 
