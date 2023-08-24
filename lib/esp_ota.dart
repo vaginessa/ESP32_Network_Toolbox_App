@@ -21,6 +21,8 @@ import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
+import 'package:wakelock/wakelock.dart';
+
 import 'constants.dart';
 
 void buyProduct(ProductDetails? product) {
@@ -535,7 +537,7 @@ class _OTAPageState extends State<OTAPage> {
                       runningOTA = true;
                       if (_userIsPremium == false) {
                         printScreen(
-                            "You must buy the premium access to go further.");
+                            "You must buy the premium access to go further.\r\n");
                         if (_products.length == 1 &&
                             _products[0].id == "premium") {
                           buyProduct(
@@ -558,8 +560,7 @@ class _OTAPageState extends State<OTAPage> {
                             pktOK = true;
                           } else if (data.startsWith('{"VERSION":')) {
                             Map<String, dynamic> versionMap = jsonDecode(data);
-                            data = versionMap["VERSION"];
-                            version = data;
+                            version = versionMap["VERSION"];
                           } else {
                             printScreen(data + "\r\n");
                           }
@@ -585,14 +586,15 @@ class _OTAPageState extends State<OTAPage> {
                               String.fromCharCodes(firebase_version)) >=
                           double.parse(version)) {
                         printScreen(
-                            "New version available ! New ${String.fromCharCodes(firebase_version)} >= device $version), proceeding...\r\n");
+                            "New version available ! New ${String.fromCharCodes(firebase_version)} >= device $version, proceeding...\r\n");
                       } else {
-                        printScreen("No new version available. aborting.");
+                        printScreen(
+                            "No new version available (${String.fromCharCodes(firebase_version)} < device $version). aborting.\r\n");
                         return;
                       }
                       // read file from firebase
                       Uint8List? firmware = await downloadFirebaseFile(
-                          "esp32_network_toolbox.bin");
+                          "esp32_network_toolbox-patched.bin");
                       if (firmware == null) {
                         printScreen("Error getting firmware.\r\n");
                         runningOTA = false;
@@ -611,6 +613,7 @@ class _OTAPageState extends State<OTAPage> {
                       }
                       printScreen("Sending data\r\n");
                       // BIN to USB
+                      Wakelock.enable();
                       for (int i = 0; i < size; i += otaBufSize) {
                         // final case
                         if (i + otaBufSize > size) {
@@ -627,7 +630,7 @@ class _OTAPageState extends State<OTAPage> {
                         }
                         pktOK = false;
                       }
-                      runningOTA = false;
+                      Wakelock.disable();
                     }
                   : () {
                       printScreen("Disconnected device\r\n");

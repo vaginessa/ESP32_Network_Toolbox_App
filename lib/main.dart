@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:usb_serial/transaction.dart';
+
 import 'package:flutter/material.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:usb_serial/usb_serial.dart';
@@ -5,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter_security_checker/flutter_security_checker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -18,6 +23,22 @@ import 'terminal.dart';
 import 'constants.dart';
 
 void main() async {
+  // security checks RELEASE
+  if (kReleaseMode == true) {
+    // Check whether the device is rooted or jailBroken.
+    // In Android Emulator or iOS Simulator it always returns true.
+    final isRooted = await FlutterSecurityChecker.isRooted;
+    // Check whether the device on which the app is installed is a physical device.
+    final isRealDevice = await FlutterSecurityChecker.isRealDevice;
+    // Check that the app is installed through the correct content service (such as Google Play or Apple Store).
+    // It is not an app installed through content service or always returns false in debugging mode.
+    final hasCorrectlyInstalled =
+        await FlutterSecurityChecker.hasCorrectlyInstalled;
+    if (isRooted || !isRealDevice || !hasCorrectlyInstalled) {
+      return;
+    }
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase
   await Firebase.initializeApp(
@@ -77,6 +98,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ScrollController _scrollController = new ScrollController();
+  var subscription;
+  String version = "";
 
   @override
   void initState() {
@@ -115,16 +138,43 @@ class _HomePageState extends State<HomePage> {
       return false;
     }
 
-    setState(() {
-      device = selectedDevice;
-      deviceConnected = true;
-    });
-
     await usbPort!.setDTR(true);
     await usbPort!.setRTS(true);
 
     usbPort!.setPortParameters(
         BAUD_RATE, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+
+    if (subscription == null) {
+      Transaction<String> transaction = Transaction.stringTerminated(
+          usbPort!.inputStream!, Uint8List.fromList([13, 10])); // \r\n
+      subscription = transaction.stream.listen((String data) {
+        // filter and print incoming data
+        if (data.startsWith('{"VERSION":')) {
+          Map<String, dynamic> versionMap = jsonDecode(data);
+          data = versionMap["VERSION"];
+          version = data;
+        }
+      });
+    }
+
+    // wait 3s for device version info
+    for (int i = 0; i < 3; i++) {
+      await usbPort!.write(Uint8List.fromList(("version\r\n").codeUnits));
+      for (int j = 0; j < 5; j++) {
+        if (version.length > 0) {
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 200), () {});
+      }
+      if (version.length > 0) {
+        break;
+      }
+    }
+
+    setState(() {
+      device = selectedDevice;
+      deviceConnected = true;
+    });
 
     return true;
   }
@@ -181,8 +231,10 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(4.0),
                 child: Center(
                     child: ListTile(
-                        title: Text("${devicesList[index].productName}"),
-                        subtitle: Text(devicesList[index].manufacturerName!),
+                        title: Text(
+                            "${devicesList[index].productName} ${devicesList[index].manufacturerName!}"),
+                        subtitle: Text(
+                            "firmware: ${(version.length > 0) ? version : '???'}"),
                         trailing: Icon(
                             (deviceConnected &&
                                     device!.deviceId ==
