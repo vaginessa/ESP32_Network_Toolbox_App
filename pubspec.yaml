@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -28,10 +28,8 @@ dependencies:
   shared_preferences: ^2.0.5
   date_format: ^2.0.2
   path: ^1.6.4
-  path_provider: ^2.0.11
   fluttertoast: ^8.0.8
   permission_handler: ^10.0.0
-  rflutter_alert: ^1.0.3
   draggable_scrollbar: ^0.1.0
   ninja_hex:
     git:
@@ -40,7 +38,14 @@ dependencies:
   http: ^0.13.5
   csv: ^5.0.1
 
-  flutter_launcher_icons: "^0.10.0"
+  firebase_core: ^2.4.0
+  firebase_storage: ^11.0.7
+  cloud_functions: ^4.0.6
+  firebase_app_check: ^0.1.1+8
+  internet_connection_checker: ^1.0.0+1
+  firebase_auth: ^4.2.3
+  google_sign_in: ^5.4.2
+  in_app_purchase: ^3.1.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -50,6 +55,15 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^2.0.0
+
+  flutter_launcher_icons: ^0.11.0
 
 flutter_icons:
   android: "launcher_icon"
@@ -93,7 +107,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-  
-  # TMP asset (TODO replace by firebase)
-  assets:
-    - assets/esp32_network_toolbox.bin

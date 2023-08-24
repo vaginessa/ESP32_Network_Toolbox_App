@@ -94,30 +94,39 @@ class _TerminalPageState extends State<TerminalPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            TextField(
-                enabled: deviceConnected,
-                controller: _controller,
-                onSubmitted: (String value) async {
-                  if (subscription == null) {
-                    Transaction<String> transaction =
-                        Transaction.stringTerminated(usbPort!.inputStream!,
-                            Uint8List.fromList([13, 10]));
-                    subscription = transaction.stream.listen((String data) {
-                      setState(() {
-                        output += data + "\r\n";
-                        _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeOut);
-                      });
-                    });
-                  }
-                  usbPort!
-                      .write(Uint8List.fromList(value.codeUnits + [13, 10]));
-                }),
+            Text(
+              'Usefull commands are: "test", "version"',
+            ),
+            Row(children: [
+              Text("\$: "),
+              Expanded(
+                  child: TextField(
+                      enabled: deviceConnected,
+                      controller: _controller,
+                      onSubmitted: (String value) async {
+                        if (subscription == null) {
+                          Transaction<String> transaction =
+                              Transaction.stringTerminated(
+                                  usbPort!.inputStream!,
+                                  Uint8List.fromList([13, 10]));
+                          subscription =
+                              transaction.stream.listen((String data) {
+                            setState(() {
+                              output += data + "\r\n";
+                              _scrollController.animateTo(
+                                  _scrollController.position.maxScrollExtent,
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeOut);
+                            });
+                          });
+                        }
+                        usbPort!.write(
+                            Uint8List.fromList(value.codeUnits + [13, 10]));
+                      })),
+            ]),
             Expanded(
                 child: SingleChildScrollView(
-              child: (Text(output)),
+              child: Text(output),
               controller: _scrollController,
             )),
           ],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,6 +12,7 @@ import 'constants.dart';
 Future<File?> localFile(String name, String ext) async {
   var res = await createDir();
   if (res == false) {
+    makeToast("Folder does not exists");
     return null;
   }
   if (fileDir!.existsSync()) {
@@ -24,15 +24,17 @@ Future<File?> localFile(String name, String ext) async {
     if (!file!.existsSync()) {
       file!.create();
     } else {
+      makeToast("file not created");
       return null;
     }
     return file;
   } else {
+    makeToast("Folder does not exists");
     return null;
   }
 }
 
-_makeToast(msg) {
+void makeToast(msg) {
   Fluttertoast.showToast(
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
@@ -44,19 +46,18 @@ _makeToast(msg) {
 }
 
 createDir() async {
-  if (await Permission.manageExternalStorage.request().isGranted) {
-    Directory? baseDir = await getExternalStorageDirectory();
-    baseDir = baseDir!.parent.parent.parent.parent;
+  if (await Permission.storage.request().isGranted) {
+    Directory? baseDir = Directory("/storage/emulated/0/Documents/");
     String dirToBeCreated = "ESP32_Network_Toolbox";
     String finalDirStr = Path.join(baseDir.path, dirToBeCreated);
     fileDir = Directory(finalDirStr);
     if (!await Directory(finalDirStr).exists()) {
-      _makeToast("Data directory doesn't exists, creating it...");
-      fileDir!.create();
+      makeToast("Data directory doesn't exists, creating it...");
+      await fileDir!.create();
     }
   } else {
-    debugPrint("Can't access to Images directory...");
-    _makeToast("Can't access to directory...");
+    debugPrint("Can't access to directory...");
+    makeToast("Can't access to directory...");
     return false;
   }
   return true;

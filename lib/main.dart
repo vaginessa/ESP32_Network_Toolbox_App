@@ -3,16 +3,32 @@ import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'wifi_sniffer.dart';
 import 'network_map.dart';
 import 'wifi_scanner.dart';
 import 'wifi_deauther.dart';
 import 'blt_scanner.dart';
-import 'esp_flash.dart';
-//import 'terminal.dart';
+import 'esp_ota.dart';
+import 'terminal.dart';
 import 'constants.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  // AppCheck
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: (kReleaseMode == true)
+        ? AndroidProvider.playIntegrity
+        : AndroidProvider.debug,
+  );
   runApp(App());
 }
 
@@ -426,29 +442,35 @@ class _HomePageState extends State<HomePage> {
                           )),
               ],
             )),
-        /*Padding(
-          padding: const EdgeInsets.only(top: 50.0),
-          child: TextButton.icon(
-            label: Text(
-              'Terminal',
-              style: TextStyle(fontSize: 25),
-              textAlign: TextAlign.center,
-            ),
-            icon: Icon(
-              Icons.computer,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TerminalPage()));
-            },
-          ),
-        )*/
         Padding(
           padding: const EdgeInsets.only(top: 50.0),
           child: TextButton.icon(
             label: Text(
-              'Flash',
+              'Terminal',
+              style: TextStyle(
+                  fontSize: 25,
+                  color: (deviceConnected) ? Colors.white : Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            icon: Icon(
+              Icons.computer,
+              color: (deviceConnected) ? Colors.white : Colors.grey,
+            ),
+            onPressed: (deviceConnected)
+                ? () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TerminalPage()));
+                  }
+                : () {},
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 50.0),
+          child: TextButton.icon(
+            label: Text(
+              'Update',
               style: TextStyle(
                   fontSize: 25,
                   color: (deviceConnected) ? Colors.white : Colors.grey),
@@ -461,7 +483,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: (deviceConnected)
                 ? () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => FlashPage()));
+                        MaterialPageRoute(builder: (context) => OTAPage()));
                   }
                 : () {},
           ),
@@ -470,5 +492,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-class BroadcastReceiver {}
