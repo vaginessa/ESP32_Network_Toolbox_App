@@ -531,7 +531,7 @@ class _OTAPageState extends State<OTAPage> {
               ),
               onPressed: (deviceConnected)
                   ? () async {
-                      /*if (_userIsPremium == false) {
+                      if (_userIsPremium == false) {
                         printScreen(
                             "You must buy the premium access to go further.");
                         if (_products.length == 1 &&
@@ -540,7 +540,7 @@ class _OTAPageState extends State<OTAPage> {
                               (_products.isNotEmpty) ? _products[0] : null);
                         }
                         return;
-                      }*/
+                      }
                       // setup uart in subscription
                       if (subscription == null) {
                         Transaction<String> transaction =
