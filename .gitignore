@@ -41,6 +41,3 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
-
-# assets
-assets/esp32_network_toolbox.bin
