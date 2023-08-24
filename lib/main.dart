@@ -446,7 +446,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(top: 50.0),
           child: TextButton.icon(
             label: Text(
-              'Terminal',
+              'ESP32 Terminal',
               style: TextStyle(
                   fontSize: 25,
                   color: (deviceConnected) ? Colors.white : Colors.grey),
@@ -470,7 +470,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(top: 50.0),
           child: TextButton.icon(
             label: Text(
-              'Update',
+              'Update ESP32',
               style: TextStyle(
                   fontSize: 25,
                   color: (deviceConnected) ? Colors.white : Colors.grey),

@@ -265,6 +265,7 @@ class _OTAPageState extends State<OTAPage> {
   bool pktOK = false;
   int otaBufSize = 4096;
   String version = "";
+  bool runningOTA = false;
   TextEditingController? _controller;
 
   ScrollController _scrollController = new ScrollController();
@@ -529,8 +530,9 @@ class _OTAPageState extends State<OTAPage> {
                 Icons.offline_bolt,
                 color: (deviceConnected) ? Colors.white : Colors.grey,
               ),
-              onPressed: (deviceConnected)
+              onPressed: (deviceConnected && runningOTA == false)
                   ? () async {
+                      runningOTA = true;
                       if (_userIsPremium == false) {
                         printScreen(
                             "You must buy the premium access to go further.");
@@ -539,6 +541,7 @@ class _OTAPageState extends State<OTAPage> {
                           buyProduct(
                               (_products.isNotEmpty) ? _products[0] : null);
                         }
+                        runningOTA = false;
                         return;
                       }
                       // setup uart in subscription
@@ -569,6 +572,7 @@ class _OTAPageState extends State<OTAPage> {
                           await downloadFirebaseFile("version.txt");
                       if (firebase_version == null) {
                         printScreen("Error getting version from firebase.\r\n");
+                        runningOTA = false;
                         return;
                       }
                       await usbPort!
@@ -591,6 +595,7 @@ class _OTAPageState extends State<OTAPage> {
                           "esp32_network_toolbox.bin");
                       if (firmware == null) {
                         printScreen("Error getting firmware.\r\n");
+                        runningOTA = false;
                         return;
                       }
                       int size = firmware.length;
@@ -622,6 +627,7 @@ class _OTAPageState extends State<OTAPage> {
                         }
                         pktOK = false;
                       }
+                      runningOTA = false;
                     }
                   : () {
                       printScreen("Disconnected device\r\n");
