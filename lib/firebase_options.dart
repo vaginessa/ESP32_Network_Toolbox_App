@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAH_80OYBVa7kuntnTcajC5RUO8-jXWQDE',
+    apiKey: 'AIzaSyCZGs898M7f9y4tzsZnRtcUIxjhCsoeLf8',
     appId: '1:455795212905:android:2036d4b77396c4f54318f8',
     messagingSenderId: '455795212905',
     projectId: 'esp32networktoolbox',
