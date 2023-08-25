@@ -255,13 +255,18 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         transaction.dispose();
       }
       // Listen packets from serial and save
+      bool first = true;
       pcapTransaction = Transaction.terminated(
           usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
       pcapTransaction!.stream.listen((Uint8List data) {
         if (file != null) {
           file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
         }
-        rawPacketsList.add(data);
+        if (first) {
+          first = false;
+        } else {
+          rawPacketsList.add(data);
+        }
       });
       String apMac = networksMap[ssidFieldValue]["BSSID"];
       int reasonFieldIndex = reasonsList.indexOf(reasonFieldValue);

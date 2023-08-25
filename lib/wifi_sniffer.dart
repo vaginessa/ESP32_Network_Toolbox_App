@@ -25,7 +25,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
 
   List<Uint8List> rawPacketsList = [];
 
-  Map<String, String> filtersList = {
+  Map<String, String?> filtersList = {
     "SSID": "",
     "MAC": "",
     "TYPE": "",
@@ -310,6 +310,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         transaction.dispose();
       }
       // Listen packets from serial and save
+      bool first = true;
       pcapTransaction = Transaction.terminated(
           usbPort!.inputStream!, Uint8List.fromList("<STOP>".codeUnits));
       pcapTransaction!.stream.listen((Uint8List data) {
@@ -318,7 +319,11 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
         } else {
           debugPrint("Error creating file\n");
         }
-        rawPacketsList.add(data);
+        if (first) {
+          first = false;
+        } else {
+          rawPacketsList.add(data);
+        }
       });
       await usbPort!
           .write(Uint8List.fromList(("wifi_sniff").codeUnits + [13, 10]));
@@ -413,7 +418,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                 setState(() {
                                   ssidFieldValue =
                                       (newValue.length > 0) ? newValue : null;
-                                  filtersList["SSID"] = ssidFieldValue!;
+                                  filtersList["SSID"] = ssidFieldValue;
                                   execFilters();
                                   if (ssidFieldValue != null) {
                                     outputMacsList = macsList
@@ -464,7 +469,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                   ssidFieldValue = null;
                                   macFieldValue =
                                       (newValue.length > 0) ? newValue : null;
-                                  filtersList["MAC"] = macFieldValue!;
+                                  filtersList["MAC"] = macFieldValue;
                                   execFilters();
                                   if (macFieldValue != null) {
                                     outputSsidsList = ssidsList
@@ -514,7 +519,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                                 ssidFieldValue = null;
                                 typeFieldValue =
                                     (newValue.length > 0) ? newValue : null;
-                                filtersList["TYPE"] = typeFieldValue!;
+                                filtersList["TYPE"] = typeFieldValue;
                                 execFilters();
                                 if (macFieldValue != null) {
                                   outputSsidsList = ssidsList
