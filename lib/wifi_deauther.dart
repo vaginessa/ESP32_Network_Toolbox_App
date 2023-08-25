@@ -170,8 +170,20 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           rawPacket.length >= 38 + rawPacket[37]) {
         Uint8List uSsid = rawPacket.sublist(38, 38 + rawPacket[37]);
         ssid = String.fromCharCodes(uSsid);
-        if (rawPacket.length >= 66) {
-          channel = rawPacket[65].toString();
+        // get channel
+        int chanPos = 38 + rawPacket[37];
+        if (rawPacket[chanPos] == 0x01) {
+          int supportedRatesLen = rawPacket[chanPos + 1];
+          chanPos = chanPos + supportedRatesLen + 2;
+        }
+        if (rawPacket[chanPos] == 0x32) {
+          int extendedSupportedRatesLen = rawPacket[chanPos + 1];
+          chanPos = chanPos + extendedSupportedRatesLen + 2;
+        }
+        if (rawPacket.length >= chanPos + 2 &&
+            rawPacket[chanPos] == 0x03 &&
+            rawPacket[chanPos + 1] == 0x01) {
+          channel = rawPacket[chanPos + 2].toString();
         }
       } else if (typeStr == "Data-QoS Data") {
         int i = indexOfStr(rawPacket, "POST");
