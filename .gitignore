@@ -1,3 +1,8 @@
+#firebase
+/ios/Runner/GoogleService-Info.plist
+/android/app/google-services.json
+/lib/firebase_options.dart
+
 # Miscellaneous
 *.class
 *.log
@@ -41,5 +46,3 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
-
-/lib/firebase_options.dart

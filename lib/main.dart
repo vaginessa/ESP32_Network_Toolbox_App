@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:flutter_security_checker/flutter_security_checker.dart';
+//import 'package:flutter_security_checker/flutter_security_checker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -24,7 +24,7 @@ import 'constants.dart';
 
 void main() async {
   // security checks RELEASE
-  if (kReleaseMode == true) {
+  /*if (kReleaseMode == true) {
     // Check whether the device is rooted or jailBroken.
     // In Android Emulator or iOS Simulator it always returns true.
     final isRooted = await FlutterSecurityChecker.isRooted;
@@ -37,7 +37,7 @@ void main() async {
     if (isRooted || !isRealDevice || !hasCorrectlyInstalled) {
       return;
     }
-  }
+  }*/
 
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase
