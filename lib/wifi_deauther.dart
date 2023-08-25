@@ -170,9 +170,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
           channel = rawPacket[chanPos + 2].toString();
         }
       } else if (typeStr == "Data-QoS Data") {
-        int i = indexOfStr(rawPacket, "POST");
-        if (i != -1) {
-          typeStr = "EvilPass";
+        if (indexOfStr(rawPacket, "POST") != -1) {
+          typeStr = "Data-QoS Data POST";
+        } else if (indexOfStr(rawPacket, "GET") != -1) {
+          typeStr = "Data-QoS Data GET";
         } else if (rawPacket.length >= 33 &&
             rawPacket[32] == 0x88 &&
             rawPacket[33] == 0x8e) {
@@ -506,7 +507,8 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                             child: new Text(value,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: (value == "EvilPass" ||
+                                    color: (value == "Data-QoS Data POST" ||
+                                            value == "Data-QoS Data GET" ||
                                             value == "Data-QoS Data KEY")
                                         ? Colors.red
                                         : Colors.white)),
