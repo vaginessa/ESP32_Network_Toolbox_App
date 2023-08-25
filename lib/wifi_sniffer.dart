@@ -403,6 +403,7 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                         value: ssidFieldValue,
                         hint: Text(
                           "SSID",
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 25,
                           ),
@@ -454,13 +455,16 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                     child: DropdownButton<String>(
                         value: macFieldValue,
                         hint: Text("MAC",
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 25,
                             )),
+                        isExpanded: true,
                         items: outputMacsList.map((String value) {
                           return new DropdownMenuItem<String>(
                             value: value,
-                            child: new Text(value),
+                            child: new Text(value,
+                                overflow: TextOverflow.ellipsis),
                           );
                         }).toList(),
                         onChanged: (sniffing!)
@@ -498,9 +502,11 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                   child: DropdownButton<String>(
                       value: typeFieldValue,
                       hint: Text("PKT TYPE",
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 25,
                           )),
+                      isExpanded: true,
                       items: outputTypesList.map((String value) {
                         return new DropdownMenuItem<String>(
                           value: value,
