@@ -96,22 +96,6 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
     return true;
   }
 
-  int indexOfStr(Uint8List haystack, String needle, [int start = 0]) {
-    if (needle.length == 0) return start;
-    var first = needle.codeUnitAt(0);
-    var end = haystack.length - needle.length;
-    for (var i = start; i <= end; i++) {
-      match:
-      if (haystack[i] == first) {
-        for (var j = 1; j < needle.length; j++) {
-          if (haystack[i + j] != needle.codeUnitAt(j)) break match;
-        }
-        return i;
-      }
-    }
-    return -1;
-  }
-
   void parsePacket(Uint8List data) {
     if (data.length > 12) {
       int pktLen = data[12];
@@ -189,6 +173,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
         int i = indexOfStr(rawPacket, "POST");
         if (i != -1) {
           typeStr = "EvilPass";
+        } else if (rawPacket.length >= 33 &&
+            rawPacket[32] == 0x88 &&
+            rawPacket[33] == 0x8e) {
+          typeStr = "Data-QoS Data KEY";
         }
       }
       if (!outputTypesList.contains(typeStr)) {
@@ -435,6 +423,10 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                                     }
                                   } else {
                                     outputMacsList = macsList;
+                                    if (!outputMacsList
+                                        .contains("ff:ff:ff:ff:ff:ff")) {
+                                      outputMacsList.add("ff:ff:ff:ff:ff:ff");
+                                    }
                                   }
                                 });
                                 execFilters();
@@ -507,7 +499,12 @@ class _WifiDeautherPageState extends State<WifiDeautherPage> {
                           return new DropdownMenuItem<String>(
                             value: value,
                             child: new Text(value,
-                                overflow: TextOverflow.ellipsis),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: (value == "EvilPass" ||
+                                            value == "Data-QoS Data KEY")
+                                        ? Colors.red
+                                        : Colors.white)),
                           );
                         }).toList(),
                         onChanged: (deauthing!)

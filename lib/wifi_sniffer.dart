@@ -174,6 +174,15 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
             rawPacket[chanPos + 1] == 0x01) {
           channel = rawPacket[chanPos + 2].toString();
         }
+      } else if (typeStr == "Data-QoS Data") {
+        int i = indexOfStr(rawPacket, "POST");
+        if (i != -1) {
+          typeStr = "EvilPass";
+        } else if (rawPacket.length >= 33 &&
+            rawPacket[32] == 0x88 &&
+            rawPacket[33] == 0x8e) {
+          typeStr = "Data-QoS Data KEY";
+        }
       }
       if (!ssidsList.contains(ssid)) {
         ssidsList.add(ssid);
@@ -489,8 +498,13 @@ class _WifiSnifferPageState extends State<WifiSnifferPage> {
                       items: outputTypesList.map((String value) {
                         return new DropdownMenuItem<String>(
                           value: value,
-                          child:
-                              new Text(value, overflow: TextOverflow.ellipsis),
+                          child: new Text(value,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: (value == "EvilPass" ||
+                                          value == "Data-QoS Data KEY")
+                                      ? Colors.red
+                                      : Colors.white)),
                         );
                       }).toList(),
                       onChanged: (sniffing!)

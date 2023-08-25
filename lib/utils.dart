@@ -115,3 +115,19 @@ void mapNetworks(Map<String, String> pkt) {
     }
   }
 }
+
+int indexOfStr(Uint8List haystack, String needle, [int start = 0]) {
+  if (needle.length == 0) return start;
+  var first = needle.codeUnitAt(0);
+  var end = haystack.length - needle.length;
+  for (var i = start; i <= end; i++) {
+    match:
+    if (haystack[i] == first) {
+      for (var j = 1; j < needle.length; j++) {
+        if (haystack[i + j] != needle.codeUnitAt(j)) break match;
+      }
+      return i;
+    }
+  }
+  return -1;
+}
